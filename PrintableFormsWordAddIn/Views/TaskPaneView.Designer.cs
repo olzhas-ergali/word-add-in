@@ -28,30 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.VariableCheckedListBox = new System.Windows.Forms.CheckedListBox();
             this.SuspendLayout();
-            // 
-            // VariableCheckedListBox
-            // 
-            this.VariableCheckedListBox.FormattingEnabled = true;
-            this.VariableCheckedListBox.Location = new System.Drawing.Point(16, 15);
-            this.VariableCheckedListBox.Name = "VariableCheckedListBox";
-            this.VariableCheckedListBox.Size = new System.Drawing.Size(248, 634);
-            this.VariableCheckedListBox.TabIndex = 0;
             // 
             // TaskPaneView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.VariableCheckedListBox);
+            this.AutoScroll = true;
+            this.AutoSize = true;
             this.Name = "TaskPaneView";
-            this.Size = new System.Drawing.Size(278, 667);
+            this.Size = new System.Drawing.Size(194, 802);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private System.Windows.Forms.CheckedListBox VariableCheckedListBox;
     }
 }

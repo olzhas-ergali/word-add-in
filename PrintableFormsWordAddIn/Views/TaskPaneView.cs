@@ -38,7 +38,7 @@ namespace PrintableFormsWordAddIn.Views
 
             checklist.AddRange(pfVariables);
 
-            VariableCheckedListBox.Controls.Clear();
+            this.Controls.Clear();
             for (int i = 0; i < checklist.Count; i++)
             {
                 var label = new Label()
@@ -54,7 +54,7 @@ namespace PrintableFormsWordAddIn.Views
                 };
                 label.MouseDown += Label_MouseDown; // Enable dragging
                 
-                VariableCheckedListBox.Controls.Add(label);
+                this.Controls.Add(label);
             }
 
             this.Refresh();
