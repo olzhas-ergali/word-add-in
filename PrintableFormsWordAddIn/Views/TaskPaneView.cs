@@ -20,14 +20,7 @@ namespace PrintableFormsWordAddIn.Views
         {
             InitializeComponent();
             this.wordApp = wordApp;
-            checklist = new List<DocumentVariable>
-            {
-                new DocumentVariable
-                {
-                    Id = Guid.Empty,
-                    Name = "Факсимиле"
-                }
-            };
+            checklist = new List<DocumentVariable>();
             apiService = new PfApiService(memoryCacheService);
             wordApp.DocumentOpen += RefreshVariables;
         }
@@ -57,7 +50,46 @@ namespace PrintableFormsWordAddIn.Views
                 this.Controls.Add(label);
             }
 
+            var picList = new string[6]
+            {
+                "<ПодписьОрганизации>",
+                "<ПодписьКлиента>",
+                "<ПечатьОрганизации>",
+                "<ПодписьСервисОрги>",
+                "<QR>",
+                "<QRDS>",
+            };
+
+            for(int i = 0; i < picList.Length; i++)
+            {
+                var label = new Label
+                {
+                    Name = picList[i],
+                    Text = picList[i],
+                    BorderStyle = BorderStyle.FixedSingle,
+                    Padding = new Padding(5),
+                    Margin = new Padding(3),
+                    Cursor = Cursors.Hand,
+                    AutoSize = true,
+                    Location = new System.Drawing.Point(0, 32 * (checklist.Count + i)),
+                };
+
+                label.MouseDown += Pic_MouseDown;
+                this.Controls.Add(label);
+            }
+            
             this.Refresh();
+        }
+
+        private void Pic_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                var label = (Label)sender;
+                var text = label.Text;
+                var id = label.Name;
+                var result = label.DoDragDrop(text, DragDropEffects.Copy);
+            }
         }
 
         private void Label_MouseDown(object sender, MouseEventArgs e)
@@ -77,7 +109,7 @@ namespace PrintableFormsWordAddIn.Views
                     {
                         doc.Variables.Add(id, text);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         MessageBox.Show(ex.Message);
                     }
