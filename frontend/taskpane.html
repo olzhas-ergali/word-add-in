@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Printable Forms</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Printable Forms</h1>
+        <p>Используйте кнопки на ленте Word для работы с печатными формами:</p>
+        
+        <ul style="margin-top: 20px; line-height: 1.8;">
+            <li><strong>Войти</strong> - Авторизация в системе</li>
+            <li><strong>Выбрать шаблон</strong> - Выбор шаблона документа</li>
+            <li><strong>Заполнить данные</strong> - Заполнение переменных в документе</li>
+            <li><strong>Выйти</strong> - Выход из системы</li>
+        </ul>
+
+        <div id="status" style="margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
+            <h2 style="margin-bottom: 10px;">Статус</h2>
+            <p id="authStatus">Проверка авторизации...</p>
+        </div>
+    </div>
+
+    <script src="src/config.js"></script>
+    <script src="src/api.js"></script>
+    <script>
+        Office.onReady(() => {
+            const authStatus = document.getElementById('authStatus');
+            
+            if (apiService.isAuthenticated()) {
+                authStatus.textContent = '✓ Вы авторизованы';
+                authStatus.style.color = 'green';
+            } else {
+                authStatus.textContent = '✗ Требуется авторизация';
+                authStatus.style.color = 'red';
+            }
+        });
+    </script>
+</body>
+</html>
+

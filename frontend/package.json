@@ -1,0 +1,30 @@
+{
+  "name": "printable-forms-word-addin",
+  "version": "1.0.0",
+  "description": "Word Add-in for Printable Forms with KeyCloak authentication",
+  "main": "index.html",
+  "scripts": {
+    "start": "office-addin-debugging start manifest.xml",
+    "stop": "office-addin-debugging stop manifest.xml",
+    "validate": "office-addin-manifest validate manifest.xml",
+    "serve": "npx http-server -p 3000 --ssl --cert localhost.crt --key localhost.key"
+  },
+  "keywords": [
+    "Office Add-in",
+    "Word",
+    "Printable Forms"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@microsoft/office-js": "^1.1.91",
+    "@microsoft/office-js-helpers": "^1.0.2"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "office-addin-debugging": "^5.0.15",
+    "office-addin-dev-certs": "^1.13.7",
+    "office-addin-manifest": "^1.13.7"
+  }
+}
+

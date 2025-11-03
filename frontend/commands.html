@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <script src="src/config.js"></script>
+    <script src="src/api.js"></script>
+</head>
+<body>
+    <script>
+        Office.onReady(() => {
+            // Register command handlers
+        });
+
+        /**
+         * Fill variables in the document
+         */
+        async function fillVariables(event) {
+            try {
+                // Get stored document info
+                const docJson = localStorage.getItem(CONFIG.STORAGE_KEYS.SELECTED_DOCUMENT);
+                if (!docJson) {
+                    throw new Error('Сначала выберите документ');
+                }
+
+                const document = JSON.parse(docJson);
+                const documentId = document.documentId || document.document_id;
+
+                await Word.run(async (context) => {
+                    const doc = context.document;
+                    
+                    // Get all variables from document
+                    const variables = doc.properties.customProperties;
+                    variables.load('items');
+                    await context.sync();
+
+                    // Collect variable IDs (names)
+                    const variableIds = [];
+                    for (let i = 0; i < variables.items.length; i++) {
+                        variableIds.push(variables.items[i].key);
+                    }
+
+                    if (variableIds.length === 0) {
+                        throw new Error('В документе нет переменных для заполнения');
+                    }
+
+                    // Get variable values from API
+                    const variablesWithValues = await apiService.getVariableValues(variableIds);
+
+                    // Create a map for quick lookup
+                    const valueMap = {};
+                    variablesWithValues.forEach(v => {
+                        const key = v.id.toString().replace(/-/g, '_');
+                        valueMap[key] = v.value || 'Пустое поле';
+                    });
+
+                    // Update variable values
+                    for (let i = 0; i < variables.items.length; i++) {
+                        const key = variables.items[i].key;
+                        if (valueMap[key]) {
+                            variables.items[i].value = valueMap[key];
+                        }
+                    }
+
+                    await context.sync();
+
+                    // Update all fields in the document
+                    const fields = doc.body.fields;
+                    fields.load('items');
+                    await context.sync();
+
+                    for (let i = 0; i < fields.items.length; i++) {
+                        fields.items[i].result.font.color = 'blue';
+                    }
+
+                    await context.sync();
+                });
+
+                console.log('Variables filled successfully');
+                event.completed();
+            } catch (error) {
+                console.error('Error filling variables:', error);
+                event.completed();
+            }
+        }
+
+        /**
+         * Logout user
+         */
+        async function logout(event) {
+            try {
+                await apiService.logout();
+                console.log('Logged out successfully');
+                event.completed();
+            } catch (error) {
+                console.error('Error logging out:', error);
+                event.completed();
+            }
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pf-word-addin-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - API_DEBUG=True
+      - PRINTABLE_FORMS_BASE_URL=${PRINTABLE_FORMS_BASE_URL:-https://apigw.test.bi.group/printable-forms}
+      - KEYCLOAK_CLIENT_API=${KEYCLOAK_CLIENT_API:-https://sso.test.bi.group/realms/bi-group/protocol/openid-connect/token}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-printable-forms}
+      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+      - CACHE_TTL=3600
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+    networks:
+      - pf-network
+
+networks:
+  pf-network:
+    driver: bridge
+

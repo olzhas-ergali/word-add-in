@@ -1,0 +1,39 @@
+﻿ID;Имя переменной;Отображаемое имя (РУ);Отображаемое имя (КЗ);Категория;Таблица БД;Поле БД;Тип данных;Обязательное;Пример значения
+237701d3-4b58-4c45-ba2d-d0cbe407089b;CONTRACT_NUMBER;Номер договора;Шарт нөмірі;Договор;contracts;contract_number;string;Да;ADL-1-204/41
+40484073-6912-4517-a596-8bd4359bd7b3;CONTRACT_DATE;Дата договора;Шарт күні;Договор;contracts;contract_date;date;Да;25.02.2020
+acbcf0d4-509a-4e42-af37-f0a700df2385;CONTRACT_PLACE;Место заключения договора;Шарт жасасу орны;Договор;contracts;contract_place;string;Да;г. Нур-Султан
+c9e186bf-cd5d-4226-b4fa-eb99954461c3;CONTRACT_YEAR;Год договора;Шарт жылы;Договор;contracts;contract_year;number;Да;2020
+47f6b62c-6fd6-446a-a774-a8d278ff1731;COMPANY_NAME;Наименование компании;Компания атауы;Уполномоченная компания;companies;company_name;string;Да;ТОО 'Town House'
+ea8eff8f-b7aa-4777-9803-15dfe4a912d9;COMPANY_DIRECTOR;Руководитель компании;Компания басшысы;Уполномоченная компания;companies;director_name;string;Да;Иванов Иван Иванович
+2739e362-e271-4dbc-ad12-784c20f5dc63;COMPANY_BASIS;Основание полномочий;Өкілеттік негізі;Уполномоченная компания;companies;authority_basis;string;Да;Устава
+74f37c09-554f-4ae5-ad25-37c7bd2df917;COMPANY_BIN;БИН компании;Компанияның БСН;Уполномоченная компания;companies;bin;string;Да;123456789012
+c1b39f73-0e01-4287-ac7b-5d2311fa5610;COMPANY_ADDRESS;Юридический адрес компании;Компанияның заңды мекенжайы;Уполномоченная компания;companies;legal_address;string;Да;г. Нур-Султан, ул. Абая, д. 10
+95d939d9-575d-4de6-852c-c168a4ad7818;COMPANY_PHONE;Телефон компании;Компания телефоны;Уполномоченная компания;companies;phone;string;Да;+7 (7172) 123-456
+b31b3e2d-d052-4a23-82e3-c1c979e74afa;COMPANY_EMAIL;Email компании;Компания email;Уполномоченная компания;companies;email;string;Нет;info@townhouse.kz
+e0344aff-4606-4395-954a-fc1f2850a450;COMPANY_BANK;Банк компании;Компания банкі;Уполномоченная компания;companies;bank_name;string;Да;АО 'Народный Банк Казахстана'
+06b83b4c-bdcd-4047-adb8-bfa43ab53155;COMPANY_ACCOUNT;Расчетный счет;Есеп шоты;Уполномоченная компания;companies;account_number;string;Да;KZ123456789012345678
+37c3395f-b3ed-4944-8105-9e6fe83ec04b;COMPANY_BIK;БИК банка;Банктің БСК;Уполномоченная компания;companies;bik;string;Да;HSBKKZKX
+6a1b9b29-680a-4fa5-94c7-12afb6da513c;CLIENT_FIO;ФИО дольщика;Үлескердің Т.А.Ә.;Дольщик;clients;full_name;string;Да;Петров Петр Петрович
+f86b04e4-5d0d-42d8-8a00-fb3ecef99e76;CLIENT_IIN;ИИН дольщика;Үлескердің ЖСН;Дольщик;clients;iin;string;Да;900101300123
+0b0968bb-26fc-4223-adb2-4203a543d337;CLIENT_ADDRESS;Адрес дольщика;Үлескердің мекенжайы;Дольщик;clients;address;string;Да;г. Нур-Султан, ул. Кенесары, д. 5, кв. 10
+98bdfd0d-086a-469a-8b37-ba70965aaed3;CLIENT_PHONE;Телефон дольщика;Үлескердің телефоны;Дольщик;clients;phone;string;Да;+7 (777) 123-45-67
+976c48b7-aa10-4627-a802-d0874e5e2130;CLIENT_EMAIL;Email дольщика;Үлескердің email;Дольщик;clients;email;string;Нет;petrov@mail.ru
+243ac31e-b682-4f5a-af04-cf53877382a0;CLIENT_PASSPORT;Документ удостоверяющий личность;Жеке куәлік;Дольщик;clients;passport_number;string;Да;N 12345678
+3fde5412-cc8b-45ea-a774-f8e0006fe066;CLIENT_PASSPORT_ISSUED_BY;Кем выдан документ;Құжатты кім берген;Дольщик;clients;passport_issued_by;string;Да;МВД РК
+ad608c2d-b622-41c4-b6fe-1da063414e5d;CLIENT_PASSPORT_DATE;Дата выдачи документа;Құжат берілген күні;Дольщик;clients;passport_issue_date;date;Да;01.01.2020
+a2adfbff-c4c2-4bca-a90c-283d57676d1b;APARTMENT_NUMBER;Номер квартиры;Пәтер нөмірі;Объект;apartments;apartment_number;string;Да;204
+b8a92a32-4663-4285-bcb9-3fd8410bb9a9;APARTMENT_FLOOR;Этаж;Қабат;Объект;apartments;floor;number;Да;5
+85e9526e-1938-4fc6-9f5f-1c24c1dd13b3;APARTMENT_AREA;Общая площадь;Жалпы алаң;Объект;apartments;total_area;number;Да;65.5
+8866e4a9-50c1-455c-af05-632ff2f5fad2;APARTMENT_ROOMS;Количество комнат;Бөлмелер саны;Объект;apartments;rooms_count;number;Да;2
+c7f8e748-3549-4338-b1e8-59bedc67c454;BUILDING_ADDRESS;Адрес дома;Үйдің мекенжайы;Объект;buildings;address;string;Да;г. Шымкент, мкр. Нурсат, ул. Жантокова, д. 1
+33e40fc2-0a3d-4d1d-861d-6e32acc9841e;BUILDING_CADASTRAL;Кадастровый номер;Кадастрлық нөмір;Объект;buildings;cadastral_number;string;Нет;10-111-222-333
+8266acb7-69e0-4199-a2ba-70f8cdb093ac;PRICE_TOTAL;Стоимость доли;Үлестің құны;Финансы;contracts;price_total;number;Да;15000000
+2debe0f6-5086-48e8-85ca-b7819d3428d4;PRICE_PER_METER;Цена за кв.м;Шаршы метрдің бағасы;Финансы;contracts;price_per_meter;number;Да;228000
+4bb3f784-a5b1-496f-8978-cd7a8c37b8db;PAYMENT_SCHEDULE;График платежей;Төлем кестесі;Финансы;contracts;payment_schedule;text;Нет;Согласно приложению №3
+1411c76c-38a9-45a8-8be7-05d68a4aa524;COMPLETION_DATE;Срок сдачи дома;Үйді тапсыру мерзімі;Сроки;contracts;completion_date;date;Да;31.12.2024
+068f3184-d24f-46f2-a736-6fb9845845af;ACCEPTANCE_ACT_NUMBER;Номер акта приемки;Қабылдау актісінің нөмірі;Документы;documents;acceptance_act_number;string;Нет;АКТ-2024-001
+a83d742c-b7c1-413c-8340-979762b1ef3b;ACCEPTANCE_ACT_DATE;Дата акта приемки;Қабылдау актісінің күні;Документы;documents;acceptance_act_date;date;Нет;15.12.2024
+ecd72d8d-6c96-47d3-b827-6cb3437ae4c7;REGISTRATION_NUMBER;Номер регистрации;Тіркеу нөмірі;Документы;documents;registration_number;string;Нет;РЕГ-2024-12345
+96b09609-2221-4439-84df-819f74f46d00;REGISTRATION_DATE;Дата регистрации;Тіркеу күні;Документы;documents;registration_date;date;Нет;20.12.2024
+e6f9652f-decc-4b07-9c3a-b11ff9aa1699;KEYS_COUNT;Количество ключей;Кілттер саны;Дополнительно;contracts;keys_count;number;Да;2
+6bbf1b9c-3d89-4482-8f0c-ff2e48492c7a;WITNESS_NAME;ФИО свидетеля;Куәгердің Т.А.Ә.;Дополнительно;contracts;witness_name;string;Нет;Сидоров Сергей Сергеевич
