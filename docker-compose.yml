@@ -1,11 +1,35 @@
 version: '3.8'
 
 services:
+  # PostgreSQL база данных
+  db:
+    image: postgres:16-alpine
+    container_name: pf-postgres
+    environment:
+      POSTGRES_DB: printable_forms
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/create_params_table.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./backend/variables_export/ddu_variables.sql:/docker-entrypoint-initdb.d/02-ddu.sql
+    restart: unless-stopped
+    networks:
+      - pf-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Python Backend
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: pf-word-addin-backend
+    container_name: pf-backend
     ports:
       - "8000:8000"
     environment:
@@ -15,13 +39,26 @@ services:
       - PRINTABLE_FORMS_BASE_URL=${PRINTABLE_FORMS_BASE_URL:-https://apigw.test.bi.group/printable-forms}
       - KEYCLOAK_CLIENT_API=${KEYCLOAK_CLIENT_API:-https://sso.test.bi.group/realms/bi-group/protocol/openid-connect/token}
       - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-printable-forms}
-      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET:-Bcb3NYb5JtFhKKuB2whG0TyxSB2NvR0t}
       - CACHE_TTL=3600
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=printable_forms
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-postgres}
+      - USE_DATABASE_DIRECT=True
     volumes:
       - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - pf-network
+
+volumes:
+  postgres_data:
+    driver: local
 
 networks:
   pf-network:

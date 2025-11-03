@@ -71,12 +71,12 @@
                   <bt:Image size="80" resid="Icon.80x80"/>
                 </Icon>
                 
-                <!-- Login Button -->
-                <Control xsi:type="Button" id="LoginButton">
-                  <Label resid="LoginButton.Label"/>
+                <!-- Parameters Button (заменил Login) -->
+                <Control xsi:type="Button" id="ParametersButton">
+                  <Label resid="ParametersButton.Label"/>
                   <Supertip>
-                    <Title resid="LoginButton.Label"/>
-                    <Description resid="LoginButton.Tooltip"/>
+                    <Title resid="ParametersButton.Label"/>
+                    <Description resid="ParametersButton.Tooltip"/>
                   </Supertip>
                   <Icon>
                     <bt:Image size="16" resid="Icon.16x16"/>
@@ -84,8 +84,8 @@
                     <bt:Image size="80" resid="Icon.80x80"/>
                   </Icon>
                   <Action xsi:type="ShowTaskpane">
-                    <TaskpaneId>LoginTaskpane</TaskpaneId>
-                    <SourceLocation resid="Login.Url"/>
+                    <TaskpaneId>ParametersTaskpane</TaskpaneId>
+                    <SourceLocation resid="Parameters.Url"/>
                   </Action>
                 </Control>
                 
@@ -124,22 +124,6 @@
                   </Action>
                 </Control>
                 
-                <!-- Logout Button -->
-                <Control xsi:type="Button" id="LogoutButton">
-                  <Label resid="LogoutButton.Label"/>
-                  <Supertip>
-                    <Title resid="LogoutButton.Label"/>
-                    <Description resid="LogoutButton.Tooltip"/>
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="Icon.16x16"/>
-                    <bt:Image size="32" resid="Icon.32x32"/>
-                    <bt:Image size="80" resid="Icon.80x80"/>
-                  </Icon>
-                  <Action xsi:type="ExecuteFunction">
-                    <FunctionName>logout</FunctionName>
-                  </Action>
-                </Control>
                 
               </Group>
             </OfficeTab>
@@ -158,7 +142,7 @@
       
       <bt:Urls>
         <bt:Url id="Commands.Url" DefaultValue="https://localhost:3000/commands.html"/>
-        <bt:Url id="Login.Url" DefaultValue="https://localhost:3000/login.html"/>
+        <bt:Url id="Parameters.Url" DefaultValue="https://localhost:3000/parameters.html"/>
         <bt:Url id="SelectDocument.Url" DefaultValue="https://localhost:3000/documents.html"/>
         <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://localhost:3000/"/>
       </bt:Urls>
@@ -166,18 +150,16 @@
       <bt:ShortStrings>
         <bt:String id="GetStarted.Title" DefaultValue="Printable Forms"/>
         <bt:String id="PrintableFormsGroup.Label" DefaultValue="Печатные формы"/>
-        <bt:String id="LoginButton.Label" DefaultValue="Войти"/>
+        <bt:String id="ParametersButton.Label" DefaultValue="Параметры БД"/>
         <bt:String id="SelectDocumentButton.Label" DefaultValue="Выбрать шаблон"/>
         <bt:String id="FillVariablesButton.Label" DefaultValue="Заполнить данные"/>
-        <bt:String id="LogoutButton.Label" DefaultValue="Выйти"/>
       </bt:ShortStrings>
       
       <bt:LongStrings>
         <bt:String id="GetStarted.Description" DefaultValue="Добро пожаловать в Printable Forms!"/>
-        <bt:String id="LoginButton.Tooltip" DefaultValue="Войти в систему"/>
+        <bt:String id="ParametersButton.Tooltip" DefaultValue="Управление параметрами в базе данных"/>
         <bt:String id="SelectDocumentButton.Tooltip" DefaultValue="Выбрать шаблон документа"/>
         <bt:String id="FillVariablesButton.Tooltip" DefaultValue="Заполнить переменные в документе"/>
-        <bt:String id="LogoutButton.Tooltip" DefaultValue="Выйти из системы"/>
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>

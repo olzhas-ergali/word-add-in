@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.api.routes import auth, documents, variables, ddu
+from app.api.routes import auth, documents, variables, ddu, params
 from app.services.database_service import db_service
 
 
@@ -35,10 +35,11 @@ async def shutdown():
         await db_service.disconnect()
 
 # Include routers
-app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+# app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])  # Отключена авторизация
 app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])
 app.include_router(variables.router, prefix="/api/variables", tags=["Variables"])
-app.include_router(ddu.router, prefix="/api/ddu", tags=["ДДУ"])  # Новый роутер!
+app.include_router(ddu.router, prefix="/api/ddu", tags=["ДДУ"])
+app.include_router(params.router, prefix="/api/params", tags=["Параметры БД"])
 
 
 @app.get("/", tags=["Health"])
