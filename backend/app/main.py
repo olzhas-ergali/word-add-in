@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.api.routes import auth, documents, variables
+from app.api.routes import auth, documents, variables, ddu
+from app.services.database_service import db_service
 
 
 app = FastAPI(
@@ -20,10 +21,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Database lifecycle
+@app.on_event("startup")
+async def startup():
+    """Подключение к БД при старте (если используется прямое подключение)"""
+    if settings.use_database_direct:
+        await db_service.connect()
+
+@app.on_event("shutdown")
+async def shutdown():
+    """Закрытие подключения к БД"""
+    if settings.use_database_direct:
+        await db_service.disconnect()
+
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])
 app.include_router(variables.router, prefix="/api/variables", tags=["Variables"])
+app.include_router(ddu.router, prefix="/api/ddu", tags=["ДДУ"])  # Новый роутер!
 
 
 @app.get("/", tags=["Health"])

@@ -31,10 +31,17 @@ class Settings(BaseSettings):
     # Cache Settings
     cache_ttl: int = 3600
     
+    # Database Configuration (для прямого подключения)
+    database_host: str = "localhost"
+    database_port: int = 5432
+    database_name: str = "printable_forms"
+    database_user: str = "postgres"
+    database_password: str = "password"
+    use_database_direct: bool = False  # Флаг: использовать ли прямое подключение к БД
+    
     class Config:
         env_file = ".env"
         case_sensitive = False
 
 
 settings = Settings()
-
