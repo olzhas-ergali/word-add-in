@@ -12,8 +12,11 @@ class Settings(BaseSettings):
     
     # CORS Settings
     cors_origins: List[str] = [
-        "https://localhost:3000",
-        "https://localhost:3001",
+        "http://localhost:8000",   # Backend для self-requests
+        "https://localhost:8000",  # Backend HTTPS
+        "http://localhost:3000",   # Frontend HTTP (development)
+        "https://localhost:3000",  # Frontend HTTPS (production)
+        "https://localhost:3001",  # Альтернативный frontend порт
     ]
     
     # Printable Forms API
