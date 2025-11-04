@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выбор шаблона</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Выбор шаблона документа</h1>
+        
+        <div id="message" class="message" style="display: none;"></div>
+        
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Загрузка шаблонов из API...</p>
+        </div>
+        
+        <div id="templatesList"></div>
+        
+        <div class="button-group" id="buttonGroup" style="display: none;">
+            <button id="selectButton" disabled>Загрузить и сохранить параметры</button>
+            <button class="btn-secondary" id="refreshButton">Обновить</button>
+        </div>
+        
+        <div id="variablesInfo" style="display: none; margin-top: 20px; padding: 15px; background: #f0f8ff; border-radius: 4px;">
+            <h3>Найденные параметры:</h3>
+            <div id="variablesList"></div>
+        </div>
+    </div>
+
+    <script src="src/config.js"></script>
+    <script>
+        const API_URL = CONFIG.API_BASE_URL;
+        
+        Office.onReady(() => {
+            let selectedTemplate = null;
+            let templates = [];
+
+            const messageDiv = document.getElementById('message');
+            const loadingDiv = document.getElementById('loading');
+            const templatesListDiv = document.getElementById('templatesList');
+            const selectButton = document.getElementById('selectButton');
+            const refreshButton = document.getElementById('refreshButton');
+            const buttonGroup = document.getElementById('buttonGroup');
+            const variablesInfo = document.getElementById('variablesInfo');
+            const variablesList = document.getElementById('variablesList');
+
+            // Загрузить шаблоны при открытии
+            loadTemplates();
+
+            refreshButton.addEventListener('click', loadTemplates);
+
+            selectButton.addEventListener('click', async () => {
+                if (!selectedTemplate) return;
+
+                selectButton.disabled = true;
+                selectButton.textContent = 'Загрузка из API...';
+                hideMessage();
+
+                try {
+                    await downloadAndSaveTemplate(selectedTemplate);
+                } catch (error) {
+                    showMessage(error.message || 'Ошибка загрузки шаблона', 'error');
+                } finally {
+                    selectButton.disabled = false;
+                    selectButton.textContent = 'Загрузить и сохранить параметры';
+                }
+            });
+
+            async function loadTemplates() {
+                loadingDiv.style.display = 'block';
+                templatesListDiv.innerHTML = '';
+                buttonGroup.style.display = 'none';
+                variablesInfo.style.display = 'none';
+                hideMessage();
+
+                try {
+                    // Загружаем список из Printable Forms API
+                    const response = await fetch(`${API_URL}/api/templates/list`);
+                    
+                    if (!response.ok) {
+                        throw new Error('Не удалось загрузить список шаблонов');
+                    }
+                    
+                    templates = await response.json();
+                    
+                    if (templates.length === 0) {
+                        templatesListDiv.innerHTML = '<div class="empty-state">Нет доступных шаблонов</div>';
+                    } else {
+                        renderTemplates(templates);
+                        buttonGroup.style.display = 'flex';
+                    }
+                } catch (error) {
+                    showMessage('Ошибка загрузки шаблонов из API: ' + error.message, 'error');
+                    templatesListDiv.innerHTML = '<div class="empty-state">Не удалось загрузить шаблоны</div>';
+                } finally {
+                    loadingDiv.style.display = 'none';
+                }
+            }
+
+            function renderTemplates(temps) {
+                const ul = document.createElement('ul');
+                ul.className = 'document-list';
+
+                temps.forEach(template => {
+                    const li = document.createElement('li');
+                    li.className = 'document-item';
+                    
+                    const docId = template.documentId || template.document_id;
+                    const fileName = template.fileName || template.file_name;
+                    const orgName = template.organizationName || template.organization_name || 'N/A';
+                    const createdAt = template.createdAt || template.created_at;
+                    
+                    li.innerHTML = `
+                        <div class="document-name">${fileName}</div>
+                        <div class="document-meta">
+                            Организация: ${orgName}<br>
+                            Создан: ${new Date(createdAt).toLocaleDateString('ru-RU')}
+                        </div>
+                    `;
+
+                    li.addEventListener('click', () => {
+                        // Убрать выделение со всех
+                        document.querySelectorAll('.document-item').forEach(item => {
+                            item.classList.remove('selected');
+                        });
+
+                        // Выделить текущий
+                        li.classList.add('selected');
+                        selectedTemplate = template;
+                        selectButton.disabled = false;
+                        variablesInfo.style.display = 'none';
+                    });
+
+                    ul.appendChild(li);
+                });
+
+                templatesListDiv.appendChild(ul);
+            }
+
+            async function downloadAndSaveTemplate(template) {
+                const docId = template.documentId || template.document_id;
+                const fileName = template.fileName || template.file_name;
+                
+                selectButton.textContent = 'Загрузка из API...';
+                
+                try {
+                    // 1. Загрузить и сохранить параметры
+                    const response = await fetch(
+                        `${API_URL}/api/templates/download/${docId}`,
+                        { method: 'POST' }
+                    );
+                    
+                    if (!response.ok) {
+                        throw new Error('Ошибка загрузки шаблона');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // 2. Показать информацию о параметрах
+                    showMessage(
+                        `✓ Загружено из API. Найдено ${data.variables.found} параметров. Сохранено в БД.`,
+                        'success'
+                    );
+                    
+                    // Показать список параметров
+                    if (data.variables.list && data.variables.list.length > 0) {
+                        variablesInfo.style.display = 'block';
+                        variablesList.innerHTML = `
+                            <p><strong>Contract ID:</strong> ${data.variables.contract_id}</p>
+                            <p><strong>Найдено переменных:</strong> ${data.variables.found}</p>
+                            <ul style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
+                                ${data.variables.list.map(v => `<li>${v.name}</li>`).join('')}
+                            </ul>
+                            <p style="margin-top: 10px; color: #2b579a;">
+                                💡 Параметры сохранены в БД. Теперь можете заполнять их в "Параметры БД"
+                            </p>
+                        `;
+                    }
+                    
+                    // 3. Загрузить файл для вставки в Word
+                    selectButton.textContent = 'Вставка в документ...';
+                    
+                    const fileResponse = await fetch(
+                        `${API_URL}/api/templates/download/${docId}/file`
+                    );
+                    
+                    const blob = await fileResponse.blob();
+                    
+                    // 4. Вставить в Word
+                    await insertDocumentToWord(blob, fileName);
+                    
+                    showMessage(`✓ Документ "${fileName}" загружен в Word!`, 'success');
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    throw error;
+                }
+            }
+
+            async function insertDocumentToWord(blob, fileName) {
+                await Word.run(async (context) => {
+                    // Читаем blob как base64
+                    const reader = new FileReader();
+                    
+                    return new Promise((resolve, reject) => {
+                        reader.onloadend = async () => {
+                            try {
+                                const base64 = reader.result.split(',')[1];
+                                
+                                // Вставляем документ
+                                const body = context.document.body;
+                                body.insertFileFromBase64(base64, Word.InsertLocation.replace);
+                                
+                                await context.sync();
+                                resolve();
+                            } catch (error) {
+                                reject(error);
+                            }
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
+                });
+            }
+
+            function showMessage(text, type = 'info') {
+                messageDiv.textContent = text;
+                messageDiv.className = `message ${type}`;
+                messageDiv.style.display = 'block';
+            }
+
+            function hideMessage() {
+                messageDiv.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -89,12 +89,12 @@
                   </Action>
                 </Control>
                 
-                <!-- Select Document Button -->
-                <Control xsi:type="Button" id="SelectDocumentButton">
-                  <Label resid="SelectDocumentButton.Label"/>
+                <!-- Load Template Button -->
+                <Control xsi:type="Button" id="LoadTemplateButton">
+                  <Label resid="LoadTemplateButton.Label"/>
                   <Supertip>
-                    <Title resid="SelectDocumentButton.Label"/>
-                    <Description resid="SelectDocumentButton.Tooltip"/>
+                    <Title resid="LoadTemplateButton.Label"/>
+                    <Description resid="LoadTemplateButton.Tooltip"/>
                   </Supertip>
                   <Icon>
                     <bt:Image size="16" resid="Icon.16x16"/>
@@ -102,8 +102,8 @@
                     <bt:Image size="80" resid="Icon.80x80"/>
                   </Icon>
                   <Action xsi:type="ShowTaskpane">
-                    <TaskpaneId>SelectDocumentTaskpane</TaskpaneId>
-                    <SourceLocation resid="SelectDocument.Url"/>
+                    <TaskpaneId>LoadTemplateTaskpane</TaskpaneId>
+                    <SourceLocation resid="LoadTemplate.Url"/>
                   </Action>
                 </Control>
                 
@@ -143,7 +143,7 @@
       <bt:Urls>
         <bt:Url id="Commands.Url" DefaultValue="https://localhost:3000/commands.html"/>
         <bt:Url id="Parameters.Url" DefaultValue="https://localhost:3000/parameters.html"/>
-        <bt:Url id="SelectDocument.Url" DefaultValue="https://localhost:3000/documents.html"/>
+        <bt:Url id="LoadTemplate.Url" DefaultValue="https://localhost:3000/templates.html"/>
         <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://localhost:3000/"/>
       </bt:Urls>
       
@@ -151,15 +151,15 @@
         <bt:String id="GetStarted.Title" DefaultValue="Printable Forms"/>
         <bt:String id="PrintableFormsGroup.Label" DefaultValue="Печатные формы"/>
         <bt:String id="ParametersButton.Label" DefaultValue="Параметры БД"/>
-        <bt:String id="SelectDocumentButton.Label" DefaultValue="Выбрать шаблон"/>
+        <bt:String id="LoadTemplateButton.Label" DefaultValue="Загрузить шаблон"/>
         <bt:String id="FillVariablesButton.Label" DefaultValue="Заполнить данные"/>
       </bt:ShortStrings>
       
       <bt:LongStrings>
         <bt:String id="GetStarted.Description" DefaultValue="Добро пожаловать в Printable Forms!"/>
         <bt:String id="ParametersButton.Tooltip" DefaultValue="Управление параметрами в базе данных"/>
-        <bt:String id="SelectDocumentButton.Tooltip" DefaultValue="Выбрать шаблон документа"/>
-        <bt:String id="FillVariablesButton.Tooltip" DefaultValue="Заполнить переменные в документе"/>
+        <bt:String id="LoadTemplateButton.Tooltip" DefaultValue="Загрузить шаблон из API и сохранить параметры в БД"/>
+        <bt:String id="FillVariablesButton.Tooltip" DefaultValue="Заполнить переменные в документе из БД"/>
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>

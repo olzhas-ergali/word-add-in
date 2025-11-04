@@ -1,0 +1,106 @@
+═══════════════════════════════════════════════════════════
+  КОМАНДЫ ДЛЯ WINDOWS (PowerShell)
+═══════════════════════════════════════════════════════════
+
+СПОСОБ 1: АВТОМАТИЧЕСКИЙ (двойной клик)
+----------------------------------------
+Просто дважды кликните на файл:
+    start-windows.bat
+
+Всё запустится автоматически!
+
+
+СПОСОБ 2: ВРУЧНУЮ (PowerShell команды)
+---------------------------------------
+
+ТЕРМИНАЛ 1 (PowerShell - Backend):
+-----------------------------------
+cd C:\Users\ВашеИмя\Downloads\word-add-in
+docker-compose up -d
+Start-Sleep -Seconds 15
+Invoke-WebRequest http://localhost:8000/health
+
+✓ Если увидели JSON - Backend работает!
+
+
+ТЕРМИНАЛ 2 (PowerShell - Frontend):
+------------------------------------
+cd C:\Users\ВашеИмя\Downloads\word-add-in\frontend
+npm install
+npx office-addin-dev-certs install
+npm run serve
+
+✓ Если увидели "Server running" - Frontend работает!
+
+
+УСТАНОВКА В WORD (выберите один способ):
+-----------------------------------------
+
+СПОСОБ А - Word Online (рекомендуется):
+1. Откройте https://office.com
+2. Word Online → Новый документ
+3. Вставка → Надстройки Office
+4. "Отправить мою надстройку" (внизу)
+5. Выберите manifest.xml
+6. Отправить
+
+СПОСОБ Б - Автоматом (Desktop Word):
+cd C:\Users\ВашеИмя\Downloads\word-add-in\frontend
+npm install -g office-addin-debugging
+office-addin-debugging start manifest.xml desktop
+
+(Word откроется с надстройкой автоматически!)
+
+СПОСОБ В - Через сетевую папку:
+1. Создать папку:
+   mkdir %LOCALAPPDATA%\Microsoft\Office\16.0\Wef
+
+2. Скопировать манифест:
+   copy manifest.xml %LOCALAPPDATA%\Microsoft\Office\16.0\Wef\
+
+3. В Word: Файл → Параметры → Центр управления безопасностью
+   → Параметры центра управления безопасностью
+   → Надежные каталоги надстроек
+   → Добавить: %LOCALAPPDATA%\Microsoft\Office\16.0\Wef
+   → Поставить галочку "Показывать в меню"
+
+4. Перезапустить Word
+
+5. Вставка → Мои надстройки → ОБЩАЯ ПАПКА
+
+
+ПРОВЕРКА:
+---------
+Браузер:
+http://localhost:8000/docs       - Swagger UI
+https://localhost:3000           - Frontend
+
+Word:
+Нажмите кнопку "Параметры БД" - должна открыться панель
+
+
+ОСТАНОВКА:
+----------
+Frontend:  Ctrl+C (в окне PowerShell)
+Backend:   docker-compose down
+
+
+ЛОГИ (если что-то не работает):
+--------------------------------
+docker-compose logs -f backend
+docker-compose logs -f db
+
+
+ПОДКЛЮЧЕНИЕ К БД (для проверки):
+---------------------------------
+docker exec -it pf-postgres psql -U postgres -d printable_forms
+
+Команды в БД:
+SELECT * FROM contract_parameters;
+\q
+
+
+═══════════════════════════════════════════════════════════
+  Всё готово! Читайте WINDOWS_ЗАПУСК.md для деталей
+═══════════════════════════════════════════════════════════
+

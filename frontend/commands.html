@@ -13,73 +13,81 @@
         });
 
         /**
-         * Fill variables in the document
+         * Fill variables in the document from DATABASE (not API!)
          */
         async function fillVariables(event) {
             try {
-                // Get stored document info
-                const docJson = localStorage.getItem(CONFIG.STORAGE_KEYS.SELECTED_DOCUMENT);
-                if (!docJson) {
-                    throw new Error('Сначала выберите документ');
+                const API_URL = CONFIG.API_BASE_URL;
+                
+                // Получаем contract_id из localStorage или спрашиваем у пользователя
+                let contractId = localStorage.getItem('current_contract_id');
+                
+                if (!contractId) {
+                    // Если не сохранен, используем дефолтный или спрашиваем
+                    contractId = prompt('Введите Contract ID:', 'DDU-2024-001');
+                    if (!contractId) {
+                        throw new Error('Contract ID не указан');
+                    }
+                    localStorage.setItem('current_contract_id', contractId);
                 }
-
-                const document = JSON.parse(docJson);
-                const documentId = document.documentId || document.document_id;
 
                 await Word.run(async (context) => {
                     const doc = context.document;
+                    const body = doc.body;
                     
-                    // Get all variables from document
-                    const variables = doc.properties.customProperties;
-                    variables.load('items');
-                    await context.sync();
-
-                    // Collect variable IDs (names)
-                    const variableIds = [];
-                    for (let i = 0; i < variables.items.length; i++) {
-                        variableIds.push(variables.items[i].key);
+                    // Получаем параметры из БД (не из API!)
+                    const response = await fetch(`${API_URL}/api/params/contract/${contractId}`);
+                    
+                    if (!response.ok) {
+                        throw new Error('Не удалось получить параметры из БД');
+                    }
+                    
+                    const data = await response.json();
+                    const parameters = data.parameters;
+                    
+                    if (!parameters || parameters.length === 0) {
+                        throw new Error(`Нет параметров для договора ${contractId} в БД`);
                     }
 
-                    if (variableIds.length === 0) {
-                        throw new Error('В документе нет переменных для заполнения');
-                    }
-
-                    // Get variable values from API
-                    const variablesWithValues = await apiService.getVariableValues(variableIds);
-
-                    // Create a map for quick lookup
-                    const valueMap = {};
-                    variablesWithValues.forEach(v => {
-                        const key = v.id.toString().replace(/-/g, '_');
-                        valueMap[key] = v.value || 'Пустое поле';
-                    });
-
-                    // Update variable values
-                    for (let i = 0; i < variables.items.length; i++) {
-                        const key = variables.items[i].key;
-                        if (valueMap[key]) {
-                            variables.items[i].value = valueMap[key];
+                    // Заменяем переменные в документе
+                    for (const param of parameters) {
+                        const paramName = param.param_name;
+                        const paramValue = param.param_value || 'Не заполнено';
+                        
+                        // Ищем все вхождения параметра в разных форматах
+                        const patterns = [
+                            `{${paramName}}`,
+                            `{{${paramName}}}`,
+                            `[${paramName}]`,
+                            `\${${paramName}}`
+                        ];
+                        
+                        for (const pattern of patterns) {
+                            const searchResults = body.search(pattern, {
+                                matchCase: false,
+                                matchWholeWord: false
+                            });
+                            
+                            searchResults.load('items');
+                            await context.sync();
+                            
+                            // Заменяем на значение
+                            for (let i = 0; i < searchResults.items.length; i++) {
+                                searchResults.items[i].insertText(paramValue, Word.InsertLocation.replace);
+                            }
                         }
                     }
-
-                    await context.sync();
-
-                    // Update all fields in the document
-                    const fields = doc.body.fields;
-                    fields.load('items');
-                    await context.sync();
-
-                    for (let i = 0; i < fields.items.length; i++) {
-                        fields.items[i].result.font.color = 'blue';
-                    }
-
+                    
                     await context.sync();
                 });
 
-                console.log('Variables filled successfully');
+                console.log(`Variables filled successfully from DB (contract: ${contractId})`);
+                alert(`Заполнено ${data.parameters.length} параметров из БД для договора ${contractId}`);
                 event.completed();
+                
             } catch (error) {
                 console.error('Error filling variables:', error);
+                alert('Ошибка: ' + error.message);
                 event.completed();
             }
         }

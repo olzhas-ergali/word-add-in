@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.api.routes import auth, documents, variables, ddu, params
+from app.api.routes import auth, documents, variables, ddu, params, templates
 from app.services.database_service import db_service
 
 
@@ -36,8 +36,9 @@ async def shutdown():
 
 # Include routers
 # app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])  # Отключена авторизация
-app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])
-app.include_router(variables.router, prefix="/api/variables", tags=["Variables"])
+# app.include_router(documents.router, prefix="/api/documents", tags=["Documents"])  # Отключен - используем templates
+# app.include_router(variables.router, prefix="/api/variables", tags=["Variables"])  # Отключен - данные из БД
+app.include_router(templates.router, prefix="/api/templates", tags=["Шаблоны"])  # Новый! Загрузка из API + сохранение в БД
 app.include_router(ddu.router, prefix="/api/ddu", tags=["ДДУ"])
 app.include_router(params.router, prefix="/api/params", tags=["Параметры БД"])
 
