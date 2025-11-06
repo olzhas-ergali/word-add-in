@@ -15,17 +15,17 @@
         
         <div id="loading" class="loading" style="display: none;">
             <div class="spinner"></div>
-            <p>Загрузка шаблонов из API...</p>
+            <p>Загрузка шаблонов...</p>
         </div>
         
         <div id="templatesList"></div>
         
         <div class="button-group" id="buttonGroup" style="display: none;">
-            <button id="selectButton" disabled>Загрузить и сохранить параметры</button>
+            <button id="selectButton" disabled>Загрузить шаблон</button>
             <button class="btn-secondary" id="refreshButton">Обновить</button>
         </div>
         
-        <div id="variablesInfo" style="display: none; margin-top: 20px; padding: 15px; background: #f0f8ff; border-radius: 4px;">
+        <div id="variablesInfo" style="display: none; margin-top: 20px; padding: 15px; background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
             <h3>Найденные параметры:</h3>
             <div id="variablesList"></div>
         </div>
@@ -35,7 +35,7 @@
     <script>
         const API_URL = CONFIG.API_BASE_URL;
         
-        Office.onReady(() => {
+        Office.onReady((info) => {
             let selectedTemplate = null;
             let templates = [];
 
@@ -48,7 +48,11 @@
             const variablesInfo = document.getElementById('variablesInfo');
             const variablesList = document.getElementById('variablesList');
 
-            // Загрузить шаблоны при открытии
+            // Check if running in Word
+            if (!info || info.host !== Office.HostType.Word) {
+                showMessage('Эта страница должна открываться внутри Microsoft Word', 'error');
+            }
+
             loadTemplates();
 
             refreshButton.addEventListener('click', loadTemplates);
@@ -57,7 +61,7 @@
                 if (!selectedTemplate) return;
 
                 selectButton.disabled = true;
-                selectButton.textContent = 'Загрузка из API...';
+                selectButton.textContent = 'Загрузка...';
                 hideMessage();
 
                 try {
@@ -66,7 +70,7 @@
                     showMessage(error.message || 'Ошибка загрузки шаблона', 'error');
                 } finally {
                     selectButton.disabled = false;
-                    selectButton.textContent = 'Загрузить и сохранить параметры';
+                    selectButton.textContent = 'Загрузить шаблон';
                 }
             });
 
@@ -78,7 +82,6 @@
                 hideMessage();
 
                 try {
-                    // Загружаем список из Printable Forms API
                     const response = await fetch(`${API_URL}/api/templates/list`);
                     
                     if (!response.ok) {
@@ -123,12 +126,9 @@
                     `;
 
                     li.addEventListener('click', () => {
-                        // Убрать выделение со всех
                         document.querySelectorAll('.document-item').forEach(item => {
                             item.classList.remove('selected');
                         });
-
-                        // Выделить текущий
                         li.classList.add('selected');
                         selectedTemplate = template;
                         selectButton.disabled = false;
@@ -145,10 +145,9 @@
                 const docId = template.documentId || template.document_id;
                 const fileName = template.fileName || template.file_name;
                 
-                selectButton.textContent = 'Загрузка из API...';
+                selectButton.textContent = 'Загрузка...';
                 
                 try {
-                    // 1. Загрузить и сохранить параметры
                     const response = await fetch(
                         `${API_URL}/api/templates/download/${docId}`,
                         { method: 'POST' }
@@ -160,28 +159,30 @@
                     
                     const data = await response.json();
                     
-                    // 2. Показать информацию о параметрах
                     showMessage(
-                        `✓ Загружено из API. Найдено ${data.variables.found} параметров. Сохранено в БД.`,
+                        `Загружено. Найдено ${data.variables.found} параметров. Сохранено в БД.`,
                         'success'
                     );
-                    
-                    // Показать список параметров
                     if (data.variables.list && data.variables.list.length > 0) {
                         variablesInfo.style.display = 'block';
                         variablesList.innerHTML = `
                             <p><strong>Contract ID:</strong> ${data.variables.contract_id}</p>
                             <p><strong>Найдено переменных:</strong> ${data.variables.found}</p>
-                            <ul style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
-                                ${data.variables.list.map(v => `<li>${v.name}</li>`).join('')}
+                            <ul style="margin-top: 10px; max-height: 200px; overflow-y: auto; list-style: none; padding: 0;">
+                                ${data.variables.list.map(v => `
+                                    <li style="padding: 8px; border-bottom: 1px solid #e2e8f0; background: #fff;">
+                                        <strong style="color: #2d3748;">${v.displayName || v.display_name || v.name}</strong>
+                                        ${v.category ? `<span style="color: #718096; font-size: 11px;"> (${v.category})</span>` : ''}
+                                        ${v.description ? `<br><span style="color: #a0aec0; font-size: 11px;">${v.description}</span>` : ''}
+                                    </li>
+                                `).join('')}
                             </ul>
-                            <p style="margin-top: 10px; color: #2b579a;">
-                                💡 Параметры сохранены в БД. Теперь можете заполнять их в "Параметры БД"
+                            <p style="margin-top: 10px; color: #555; font-size: 13px;">
+                                Параметры сохранены в БД. Теперь можете заполнять их в разделе "Параметры"
                             </p>
                         `;
                     }
                     
-                    // 3. Загрузить файл для вставки в Word
                     selectButton.textContent = 'Вставка в документ...';
                     
                     const fileResponse = await fetch(
@@ -189,11 +190,9 @@
                     );
                     
                     const blob = await fileResponse.blob();
-                    
-                    // 4. Вставить в Word
                     await insertDocumentToWord(blob, fileName);
                     
-                    showMessage(`✓ Документ "${fileName}" загружен в Word!`, 'success');
+                    showMessage(`Документ "${fileName}" загружен в Word`, 'success');
                     
                 } catch (error) {
                     console.error('Error:', error);
@@ -202,19 +201,19 @@
             }
 
             async function insertDocumentToWord(blob, fileName) {
+                if (typeof Word === 'undefined') {
+                    throw new Error('Word API не доступен. Эта функция работает только внутри Word.');
+                }
+                
                 await Word.run(async (context) => {
-                    // Читаем blob как base64
                     const reader = new FileReader();
                     
                     return new Promise((resolve, reject) => {
                         reader.onloadend = async () => {
                             try {
                                 const base64 = reader.result.split(',')[1];
-                                
-                                // Вставляем документ
                                 const body = context.document.body;
                                 body.insertFileFromBase64(base64, Word.InsertLocation.replace);
-                                
                                 await context.sync();
                                 resolve();
                             } catch (error) {

@@ -9,7 +9,8 @@ import asyncpg  # PostgreSQL
 # или
 # import aiomysql  # MySQL
 from app.config import settings
-from app.models.document import DocumentVariable
+from app.models.document import DocumentVariable, PfDocument
+from datetime import datetime
 
 
 class DatabaseService:
@@ -41,6 +42,129 @@ class DatabaseService:
         """Закрыть пул подключений"""
         if self.pool:
             await self.pool.close()
+    
+    async def get_all_templates(self) -> List[PfDocument]:
+        """
+        Получить все шаблоны документов из БД
+        
+        Returns:
+            List[PfDocument] со списком доступных шаблонов
+        """
+        if not self.pool:
+            await self.connect()
+        
+        templates = []
+        
+        async with self.pool.acquire() as conn:
+            query = """
+                SELECT id, name, file_name, created_at
+                FROM documents
+                ORDER BY created_at DESC
+            """
+            
+            rows = await conn.fetch(query)
+            
+            for row in rows:
+                templates.append(PfDocument(
+                    document_id=UUID(row['id']),
+                    document_name=row['name'],
+                    file_name=row['file_name'] or f"{row['name']}.docx",
+                    created_at=row['created_at'] if row['created_at'] else datetime.now(),
+                    content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                ))
+        
+        return templates
+    
+    async def get_document_variables(self, document_id: UUID) -> List[DocumentVariable]:
+        """
+        Получить все переменные для документа из БД
+        
+        Args:
+            document_id: UUID документа
+            
+        Returns:
+            List[DocumentVariable] со списком переменных документа
+        """
+        if not self.pool:
+            await self.connect()
+        
+        variables = []
+        
+        async with self.pool.acquire() as conn:
+            query = """
+                SELECT 
+                    id, document_id, name, display_name, display_name_kz,
+                    description, table_name, field_name, data_type,
+                    required, example, category
+                FROM document_variables
+                WHERE document_id = $1
+                ORDER BY category, name
+            """
+            
+            rows = await conn.fetch(query, str(document_id))
+            
+            for row in rows:
+                # Преобразуем data_type в правильный формат
+                data_type = row['data_type']
+                if data_type == 'string':
+                    var_type = 'Text'
+                elif data_type == 'number':
+                    var_type = 'Number'
+                elif data_type == 'date':
+                    var_type = 'Date'
+                elif data_type == 'text':
+                    var_type = 'Text'
+                else:
+                    var_type = 'Text'
+                
+                variables.append(DocumentVariable(
+                    id=UUID(row['id']),
+                    table=row['table_name'],
+                    field=row['field_name'],
+                    name=row['name'],
+                    display_name=row['display_name'],
+                    display_name_kz=row['display_name_kz'],
+                    description=row['description'],
+                    category=row['category'],
+                    data_type=row['data_type'],
+                    required=row['required'] if row['required'] is not None else False,
+                    example=row['example'],
+                    value=None
+                ))
+        
+        return variables
+    
+    async def get_template_docx(self, document_id: UUID) -> Optional[bytes]:
+        """
+        Получить содержимое DOCX файла шаблона
+        
+        Args:
+            document_id: UUID документа
+            
+        Returns:
+            bytes содержимого файла или None
+        """
+        # В демо-режиме возвращаем файл из файловой системы
+        import os
+        
+        # Пути для поиска файла (пробуем несколько вариантов)
+        possible_paths = [
+            '/app/ДДУ Шымкент.docx',  # В корне приложения в Docker
+            os.path.join(os.path.dirname(__file__), '../../ДДУ Шымкент.docx'),  # Относительный путь
+            '/app/backend/ДДУ Шымкент.docx',  # В папке backend в Docker
+        ]
+        
+        for file_path in possible_paths:
+            if os.path.exists(file_path):
+                print(f"✅ Found document file: {file_path}")
+                with open(file_path, 'rb') as f:
+                    return f.read()
+        
+        # Если файл не найден, возвращаем None
+        print(f"⚠️ Warning: Document file not found. Tried paths:")
+        for path in possible_paths:
+            print(f"   - {path}")
+        return None
     
     async def get_variable_values_by_contract(
         self, 

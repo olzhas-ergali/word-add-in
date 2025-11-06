@@ -1,30 +1,23 @@
-/**
- * API service for communicating with backend
- */
 class ApiService {
     constructor() {
         this.baseUrl = CONFIG.API_BASE_URL;
         this.sessionId = localStorage.getItem(CONFIG.STORAGE_KEYS.SESSION_ID);
+        
+        if (!this.sessionId) {
+            this.sessionId = 'demo-auto-session-' + Date.now();
+            localStorage.setItem(CONFIG.STORAGE_KEYS.SESSION_ID, this.sessionId);
+            localStorage.setItem(CONFIG.STORAGE_KEYS.ACCESS_TOKEN, 'demo-token');
+        }
     }
 
-    /**
-     * Get headers with session ID
-     */
     getHeaders() {
-        const headers = {
-            'Content-Type': 'application/json'
-        };
-        
+        const headers = {'Content-Type': 'application/json'};
         if (this.sessionId) {
             headers['X-Session-ID'] = this.sessionId;
         }
-        
         return headers;
     }
 
-    /**
-     * Login user
-     */
     async login(username, password) {
         try {
             const response = await fetch(`${this.baseUrl}${CONFIG.ENDPOINTS.LOGIN}`, {
@@ -32,24 +25,17 @@ class ApiService {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
             });
-
             const data = await response.json();
-
             if (!response.ok) {
                 throw new Error(data.detail?.message || data.message || 'Login failed');
             }
-
-            // Save session ID
             if (data.session_id) {
                 this.sessionId = data.session_id;
                 localStorage.setItem(CONFIG.STORAGE_KEYS.SESSION_ID, data.session_id);
             }
-
-            // Save access token
             if (data.data?.access_token) {
                 localStorage.setItem(CONFIG.STORAGE_KEYS.ACCESS_TOKEN, data.data.access_token);
             }
-
             return data;
         } catch (error) {
             console.error('Login error:', error);
@@ -57,17 +43,12 @@ class ApiService {
         }
     }
 
-    /**
-     * Logout user
-     */
     async logout() {
         try {
             await fetch(`${this.baseUrl}${CONFIG.ENDPOINTS.LOGOUT}`, {
                 method: 'POST',
                 headers: this.getHeaders()
             });
-
-            // Clear local storage
             localStorage.removeItem(CONFIG.STORAGE_KEYS.SESSION_ID);
             localStorage.removeItem(CONFIG.STORAGE_KEYS.ACCESS_TOKEN);
             localStorage.removeItem(CONFIG.STORAGE_KEYS.SELECTED_DOCUMENT);
@@ -77,20 +58,15 @@ class ApiService {
         }
     }
 
-    /**
-     * Get list of documents
-     */
     async getDocuments() {
         try {
             const response = await fetch(`${this.baseUrl}${CONFIG.ENDPOINTS.DOCUMENTS}`, {
                 method: 'GET',
                 headers: this.getHeaders()
             });
-
             if (!response.ok) {
                 throw new Error('Failed to fetch documents');
             }
-
             return await response.json();
         } catch (error) {
             console.error('Get documents error:', error);
@@ -98,23 +74,15 @@ class ApiService {
         }
     }
 
-    /**
-     * Download document
-     */
     async downloadDocument(documentId) {
         try {
             const response = await fetch(
                 `${this.baseUrl}${CONFIG.ENDPOINTS.DOWNLOAD}/${documentId}`,
-                {
-                    method: 'GET',
-                    headers: this.getHeaders()
-                }
+                {method: 'GET', headers: this.getHeaders()}
             );
-
             if (!response.ok) {
                 throw new Error('Failed to download document');
             }
-
             return await response.blob();
         } catch (error) {
             console.error('Download document error:', error);
@@ -122,23 +90,15 @@ class ApiService {
         }
     }
 
-    /**
-     * Get document variables
-     */
     async getDocumentVariables(documentId) {
         try {
             const response = await fetch(
                 `${this.baseUrl}${CONFIG.ENDPOINTS.VARIABLES}/${documentId}`,
-                {
-                    method: 'GET',
-                    headers: this.getHeaders()
-                }
+                {method: 'GET', headers: this.getHeaders()}
             );
-
             if (!response.ok) {
                 throw new Error('Failed to fetch document variables');
             }
-
             return await response.json();
         } catch (error) {
             console.error('Get document variables error:', error);
@@ -146,9 +106,6 @@ class ApiService {
         }
     }
 
-    /**
-     * Get variable values
-     */
     async getVariableValues(variableIds) {
         try {
             const response = await fetch(
@@ -159,11 +116,9 @@ class ApiService {
                     body: JSON.stringify({ ids: variableIds })
                 }
             );
-
             if (!response.ok) {
                 throw new Error('Failed to fetch variable values');
             }
-
             return await response.json();
         } catch (error) {
             console.error('Get variable values error:', error);
@@ -171,14 +126,15 @@ class ApiService {
         }
     }
 
-    /**
-     * Check if user is authenticated
-     */
     isAuthenticated() {
+        this.sessionId = localStorage.getItem(CONFIG.STORAGE_KEYS.SESSION_ID);
         return !!this.sessionId;
+    }
+    
+    getSessionId() {
+        return this.sessionId || localStorage.getItem(CONFIG.STORAGE_KEYS.SESSION_ID);
     }
 }
 
-// Create global API service instance
 const apiService = new ApiService();
 

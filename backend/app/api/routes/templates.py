@@ -1,8 +1,3 @@
-"""
-API для работы с шаблонами
-Загрузка шаблонов из Printable Forms API и автоматическое сохранение параметров в БД
-"""
-
 from fastapi import APIRouter, HTTPException
 from typing import List
 from uuid import UUID
@@ -18,34 +13,22 @@ router = APIRouter()
 
 
 async def extract_variables_from_docx(docx_bytes: bytes) -> List[dict]:
-    """
-    Извлечь переменные из Word документа
-    
-    Поддерживаемые форматы:
-    - {VARIABLE_NAME}
-    - {{VARIABLE_NAME}}
-    - [VARIABLE_NAME]
-    - ${VARIABLE_NAME}
-    """
     doc = Document(BytesIO(docx_bytes))
     variables = set()
     
-    # Паттерны для поиска переменных
     patterns = [
-        r'\{([A-Za-z_][A-Za-z0-9_]*)\}',           # {VAR}
-        r'\{\{([A-Za-z_][A-Za-z0-9_]*)\}\}',       # {{VAR}}
-        r'\[([A-Za-z_][A-Za-z0-9_]*)\]',           # [VAR]
-        r'\$\{([A-Za-z_][A-Za-z0-9_]*)\}',         # ${VAR}
+        r'\{([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)\}',
+        r'\{\{([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)\}\}',
+        r'\[([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)\]',
+        r'\$\{([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)\}',
     ]
     
-    # Извлекаем из параграфов
     for para in doc.paragraphs:
         text = para.text
         for pattern in patterns:
             matches = re.findall(pattern, text)
             variables.update(matches)
     
-    # Извлекаем из таблиц
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:
@@ -54,7 +37,6 @@ async def extract_variables_from_docx(docx_bytes: bytes) -> List[dict]:
                     matches = re.findall(pattern, text)
                     variables.update(matches)
     
-    # Извлекаем из Custom Properties
     try:
         for prop in doc.core_properties.custom_properties:
             variables.add(prop.name)
@@ -65,15 +47,11 @@ async def extract_variables_from_docx(docx_bytes: bytes) -> List[dict]:
 
 
 async def save_variables_to_db(document_id: str, document_name: str, variables: List[dict]):
-    """
-    Сохранить переменные в БД
-    """
     if not db_service.pool:
         await db_service.connect()
     
     async with db_service.pool.acquire() as conn:
         for var in variables:
-            # Вставляем параметр, если уже существует - пропускаем
             await conn.execute("""
                 INSERT INTO contract_parameters 
                 (contract_id, param_name, param_value, description)
@@ -89,14 +67,7 @@ async def save_variables_to_db(document_id: str, document_name: str, variables: 
 
 @router.get("/list", response_model=List[PfDocument])
 async def get_template_list():
-    """
-    Получить список шаблонов из Printable Forms API
-    
-    Returns:
-        List[PfDocument] - список доступных шаблонов
-    """
     pf_service = PfApiService()
-    
     try:
         documents = await pf_service.get_template_files(token=None)
         return documents
@@ -109,25 +80,14 @@ async def get_template_list():
 
 @router.post("/download/{document_id}")
 async def download_and_save_template(document_id: UUID):
-    """
-    Загрузить шаблон из API и автоматически сохранить параметры в БД
-    
-    Args:
-        document_id: UUID документа
-        
-    Returns:
-        Информация о загруженном документе и сохраненных параметрах
-    """
     pf_service = PfApiService()
     
     try:
-        # 1. Загрузить документ из API
         docx_bytes = await pf_service.get_pf_document(document_id, token=None)
         
         if not docx_bytes:
             raise HTTPException(status_code=404, detail="Документ не найден в API")
         
-        # 2. Получить метаданные документа
         documents = await pf_service.get_template_files(token=None)
         document = next((d for d in documents if d.document_id == document_id), None)
         
@@ -137,14 +97,11 @@ async def download_and_save_template(document_id: UUID):
         document_name = document.file_name
         contract_id = f"TEMPLATE-{str(document_id)[:8]}"
         
-        # 3. Извлечь переменные из документа
         variables = await extract_variables_from_docx(docx_bytes)
         
-        # 4. Сохранить переменные в БД
         if variables:
             await save_variables_to_db(contract_id, document_name, variables)
         
-        # 5. Вернуть документ и информацию о сохраненных параметрах
         return {
             "success": True,
             "document": {
@@ -173,15 +130,6 @@ async def download_and_save_template(document_id: UUID):
 
 @router.get("/download/{document_id}/file")
 async def download_template_file(document_id: UUID):
-    """
-    Скачать только файл шаблона (без сохранения параметров)
-    
-    Args:
-        document_id: UUID документа
-        
-    Returns:
-        Файл документа
-    """
     from fastapi.responses import StreamingResponse
     
     pf_service = PfApiService()

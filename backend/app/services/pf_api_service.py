@@ -23,6 +23,15 @@ class PfApiService:
         Returns:
             List of PfDocument objects
         """
+        # ДЕМО-РЕЖИМ: Возвращаем тестовые документы из БД
+        if settings.demo_mode:
+            print("🎭 DEMO MODE: Using database instead of API for templates")
+            from app.services.database_service import db_service
+            # Получаем шаблоны из базы данных
+            templates = await db_service.get_all_templates()
+            return templates
+        
+        # Обычный режим с API
         url = f"{self.base_url}{settings.printable_forms_get_file_list_api}"
         
         headers = {}
@@ -52,6 +61,15 @@ class PfApiService:
         Returns:
             Document bytes or None if error
         """
+        # ДЕМО-РЕЖИМ: Возвращаем документ из БД
+        if settings.demo_mode:
+            print(f"🎭 DEMO MODE: Fetching document {document_id} from database")
+            from app.services.database_service import db_service
+            # Получаем документ из базы данных
+            document_bytes = await db_service.get_template_docx(document_id)
+            return document_bytes
+        
+        # Обычный режим с API
         url = f"{self.base_url}{settings.printable_forms_get_docx_api}"
         params = {"documentId": str(document_id)}
         
@@ -85,6 +103,15 @@ class PfApiService:
         Returns:
             List of DocumentVariable objects
         """
+        # ДЕМО-РЕЖИМ: Возвращаем переменные из БД
+        if settings.demo_mode:
+            print(f"🎭 DEMO MODE: Fetching variables for document {document_id} from database")
+            from app.services.database_service import db_service
+            # Получаем переменные документа из базы данных
+            variables = await db_service.get_document_variables(document_id)
+            return variables
+        
+        # Обычный режим с API
         url = f"{self.base_url}{settings.printable_forms_get_doc_variables_api}"
         params = {"documentId": str(document_id)}
         

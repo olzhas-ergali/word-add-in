@@ -23,6 +23,28 @@ class KeyCloakService:
         Returns:
             KeyCloakResponse with token data or error
         """
+        # ДЕМО-РЕЖИМ: Принимаем любые учетные данные
+        from app.config import settings
+        from uuid import uuid4
+        if settings.demo_mode:
+            print(f"🎭 DEMO MODE: Accepting login for user '{username}'")
+            # Возвращаем фейковый токен для демо-режима
+            demo_token = KeyCloakToken(
+                access_token="demo_access_token_" + username,
+                expires_in=3600,
+                refresh_expires_in=7200,
+                refresh_token="demo_refresh_token",
+                token_type="Bearer",
+                session_state=uuid4()  # Генерируем валидный UUID для session
+            )
+            return KeyCloakResponse(
+                success=True,
+                status_code=200,
+                data=demo_token,
+                message=f"Demo mode: authenticated as {username}"
+            )
+        
+        # Обычный режим с реальным KeyCloak
         data = {
             "grant_type": "password",
             "scope": "openid",

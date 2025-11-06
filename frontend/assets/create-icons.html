@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Icons</title>
+</head>
+<body>
+<canvas id="canvas16" width="16" height="16"></canvas>
+<canvas id="canvas32" width="32" height="32"></canvas>
+<canvas id="canvas64" width="64" height="64"></canvas>
+<canvas id="canvas80" width="80" height="80"></canvas>
+
+<script>
+function createIcon(size) {
+    const canvas = document.getElementById('canvas' + size);
+    const ctx = canvas.getContext('2d');
+    
+    // Background
+    ctx.fillStyle = '#4a90e2';
+    ctx.fillRect(0, 0, size, size);
+    
+    // Text
+    ctx.fillStyle = 'white';
+    ctx.font = `bold ${size * 0.6}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('ПФ', size / 2, size / 2);
+    
+    // Download
+    canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `icon-${size}.png`;
+        a.click();
+    });
+}
+
+[16, 32, 64, 80].forEach(size => createIcon(size));
+</script>
+</body>
+</html>

@@ -10,18 +10,18 @@
 <body>
     <div class="container">
         <h1>Printable Forms</h1>
-        <p>Используйте кнопки на ленте Word для работы с печатными формами:</p>
+        <p>Используйте кнопки на ленте Word:</p>
         
         <ul style="margin-top: 20px; line-height: 1.8;">
-            <li><strong>Войти</strong> - Авторизация в системе</li>
-            <li><strong>Выбрать шаблон</strong> - Выбор шаблона документа</li>
-            <li><strong>Заполнить данные</strong> - Заполнение переменных в документе</li>
-            <li><strong>Выйти</strong> - Выход из системы</li>
+            <li><strong>Параметры</strong> - Управление параметрами</li>
+            <li><strong>Выбрать шаблон</strong> - Загрузка шаблона</li>
+            <li><strong>Вставить переменные</strong> - Вставка переменных в документ</li>
+            <li><strong>Заполнить</strong> - Заполнение переменных данными</li>
         </ul>
 
-        <div id="status" style="margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
+        <div id="status" style="margin-top: 30px; padding: 15px; background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
             <h2 style="margin-bottom: 10px;">Статус</h2>
-            <p id="authStatus">Проверка авторизации...</p>
+            <p id="authStatus">Система готова к работе</p>
         </div>
     </div>
 
@@ -30,14 +30,7 @@
     <script>
         Office.onReady(() => {
             const authStatus = document.getElementById('authStatus');
-            
-            if (apiService.isAuthenticated()) {
-                authStatus.textContent = '✓ Вы авторизованы';
-                authStatus.style.color = 'green';
-            } else {
-                authStatus.textContent = '✗ Требуется авторизация';
-                authStatus.style.color = 'red';
-            }
+            authStatus.textContent = 'Система готова к работе';
         });
     </script>
 </body>

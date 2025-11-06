@@ -18,15 +18,15 @@
   <Description DefaultValue="Надстройка для работы с договорами ДДУ"/>
   
   <!-- Icon URL -->
-  <IconUrl DefaultValue="https://localhost:3000/assets/icon-32.png"/>
-  <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-64.png"/>
+  <IconUrl DefaultValue="https://localhost:3001/assets/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://localhost:3001/assets/icon-64.png"/>
   
   <!-- Support URL -->
-  <SupportUrl DefaultValue="https://localhost:3000/support"/>
+  <SupportUrl DefaultValue="https://localhost:3001/support"/>
   
   <!-- App Domains -->
   <AppDomains>
-    <AppDomain>https://localhost:3000</AppDomain>
+    <AppDomain>https://localhost:3001</AppDomain>
   </AppDomains>
   
   <!-- Hosts -->
@@ -36,7 +36,7 @@
   
   <!-- Default Settings -->
   <DefaultSettings>
-    <SourceLocation DefaultValue="https://localhost:3000/taskpane.html"/>
+    <SourceLocation DefaultValue="https://localhost:3001/taskpane.html"/>
   </DefaultSettings>
   
   <!-- Permissions -->
@@ -107,24 +107,6 @@
                   </Action>
                 </Control>
                 
-                <!-- Insert Variables Button -->
-                <Control xsi:type="Button" id="InsertVariablesButton">
-                  <Label resid="InsertVariablesButton.Label"/>
-                  <Supertip>
-                    <Title resid="InsertVariablesButton.Label"/>
-                    <Description resid="InsertVariablesButton.Tooltip"/>
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="Icon.16x16"/>
-                    <bt:Image size="32" resid="Icon.32x32"/>
-                    <bt:Image size="80" resid="Icon.80x80"/>
-                  </Icon>
-                  <Action xsi:type="ShowTaskpane">
-                    <TaskpaneId>InsertVariablesTaskpane</TaskpaneId>
-                    <SourceLocation resid="InsertVariables.Url"/>
-                  </Action>
-                </Control>
-                
                 <!-- Fill Variables Button -->
                 <Control xsi:type="Button" id="FillVariablesButton">
                   <Label resid="FillVariablesButton.Label"/>
@@ -153,17 +135,16 @@
     <!-- Resources -->
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://localhost:3000/assets/icon-16.png"/>
-        <bt:Image id="Icon.32x32" DefaultValue="https://localhost:3000/assets/icon-32.png"/>
-        <bt:Image id="Icon.80x80" DefaultValue="https://localhost:3000/assets/icon-80.png"/>
+        <bt:Image id="Icon.16x16" DefaultValue="https://localhost:3001/assets/icon-16.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://localhost:3001/assets/icon-32.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://localhost:3001/assets/icon-80.png"/>
       </bt:Images>
       
       <bt:Urls>
-        <bt:Url id="Commands.Url" DefaultValue="https://localhost:3000/commands.html"/>
-        <bt:Url id="Parameters.Url" DefaultValue="https://localhost:3000/parameters.html"/>
-        <bt:Url id="LoadTemplate.Url" DefaultValue="https://localhost:3000/templates.html"/>
-        <bt:Url id="InsertVariables.Url" DefaultValue="https://localhost:3000/variables.html"/>
-        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://localhost:3000/"/>
+        <bt:Url id="Commands.Url" DefaultValue="https://localhost:3001/commands.html"/>
+        <bt:Url id="Parameters.Url" DefaultValue="https://localhost:3001/parameters.html"/>
+        <bt:Url id="LoadTemplate.Url" DefaultValue="https://localhost:3001/templates.html"/>
+        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://localhost:3001/"/>
       </bt:Urls>
       
       <bt:ShortStrings>
@@ -171,7 +152,6 @@
         <bt:String id="PrintableFormsGroup.Label" DefaultValue="Договоры ДДУ"/>
         <bt:String id="ParametersButton.Label" DefaultValue="Параметры"/>
         <bt:String id="LoadTemplateButton.Label" DefaultValue="Выбрать шаблон"/>
-        <bt:String id="InsertVariablesButton.Label" DefaultValue="Вставить переменные"/>
         <bt:String id="FillVariablesButton.Label" DefaultValue="Заполнить"/>
       </bt:ShortStrings>
       
@@ -179,7 +159,6 @@
         <bt:String id="GetStarted.Description" DefaultValue="Работа с договорами долевого участия"/>
         <bt:String id="ParametersButton.Tooltip" DefaultValue="Просмотр и редактирование параметров договора"/>
         <bt:String id="LoadTemplateButton.Tooltip" DefaultValue="Выбрать и загрузить шаблон договора ДДУ"/>
-        <bt:String id="InsertVariablesButton.Tooltip" DefaultValue="Вставить переменные с русскими названиями в документ"/>
         <bt:String id="FillVariablesButton.Tooltip" DefaultValue="Автоматически заполнить параметры в договоре"/>
       </bt:LongStrings>
     </Resources>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вставка переменных</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <link rel="stylesheet" href="src/styles.css">
+    <style>
+        .variable-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+        .variable-item {
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: #fff;
+        }
+        .variable-item:hover {
+            background-color: #f7fafc;
+            border-color: #a0aec0;
+        }
+        .variable-item.selected {
+            background-color: #edf2f7;
+            border-color: #4a5568;
+            border-width: 2px;
+        }
+        .variable-name {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+        .variable-tech-name {
+            font-size: 11px;
+            color: #a0aec0;
+            font-family: monospace;
+        }
+        .variable-meta {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 4px;
+        }
+        .category-group {
+            margin-bottom: 20px;
+        }
+        .category-title {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #f7fafc;
+            border-left: 3px solid #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Вставка переменных</h1>
+        
+        <div id="message" class="message" style="display: none;"></div>
+        
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Загрузка переменных...</p>
+        </div>
+        
+        <div id="variablesList"></div>
+        
+        <div class="button-group" style="margin-top: 20px;">
+            <button id="insertButton" disabled>Вставить выбранные</button>
+            <button class="btn-secondary" id="refreshButton">Обновить</button>
+        </div>
+    </div>
+
+    <script src="src/config.js"></script>
+    <script src="src/api.js"></script>
+    <script>
+        Office.onReady((info) => {
+            let allVariables = [];
+            let selectedVariables = [];
+
+            const messageDiv = document.getElementById('message');
+            const loadingDiv = document.getElementById('loading');
+            const variablesListDiv = document.getElementById('variablesList');
+            const insertButton = document.getElementById('insertButton');
+            const refreshButton = document.getElementById('refreshButton');
+
+            if (!info || info.host !== Office.HostType.Word) {
+                showMessage('Эта страница должна открываться внутри Microsoft Word', 'error');
+            }
+
+            loadVariables();
+
+            refreshButton.addEventListener('click', loadVariables);
+
+            insertButton.addEventListener('click', async () => {
+                if (selectedVariables.length === 0) return;
+
+                insertButton.disabled = true;
+                insertButton.textContent = 'Вставка...';
+                hideMessage();
+
+                try {
+                    await insertVariablesIntoDocument(selectedVariables);
+                    showMessage(`Вставлено ${selectedVariables.length} переменных`, 'success');
+                } catch (error) {
+                    showMessage(error.message || 'Ошибка вставки переменных', 'error');
+                } finally {
+                    insertButton.disabled = false;
+                    insertButton.textContent = 'Вставить выбранные';
+                }
+            });
+
+            async function loadVariables() {
+                loadingDiv.style.display = 'block';
+                variablesListDiv.innerHTML = '';
+                hideMessage();
+
+                try {
+                    const selectedDoc = localStorage.getItem(CONFIG.STORAGE_KEYS.SELECTED_DOCUMENT);
+                    
+                    if (!selectedDoc) {
+                        throw new Error('Сначала выберите документ в разделе "Загрузить шаблон"');
+                    }
+
+                    const doc = JSON.parse(selectedDoc);
+                    const documentId = doc.documentId || doc.document_id;
+                    const response = await apiService.getDocumentVariables(documentId);
+                    
+                    if (!response || !response.variables) {
+                        throw new Error('Не удалось загрузить переменные');
+                    }
+
+                    allVariables = response.variables;
+                    renderVariables(allVariables);
+                    
+                } catch (error) {
+                    showMessage('Ошибка загрузки переменных: ' + error.message, 'error');
+                    variablesListDiv.innerHTML = '<div class="empty-state">Не удалось загрузить переменные</div>';
+                } finally {
+                    loadingDiv.style.display = 'none';
+                }
+            }
+
+            function renderVariables(variables) {
+                if (!variables || variables.length === 0) {
+                    variablesListDiv.innerHTML = '<div class="empty-state">Нет доступных переменных</div>';
+                    return;
+                }
+
+                const grouped = {};
+                variables.forEach(v => {
+                    const cat = v.category || 'Другое';
+                    if (!grouped[cat]) grouped[cat] = [];
+                    grouped[cat].push(v);
+                });
+
+                let html = '';
+                Object.keys(grouped).forEach(category => {
+                    html += `<div class="category-group">`;
+                    html += `<div class="category-title">${category}</div>`;
+                    html += `<ul class="variable-list">`;
+                    
+                    grouped[category].forEach(variable => {
+                        html += `
+                            <li class="variable-item" data-id="${variable.id}" data-name="${variable.name}">
+                                <div class="variable-name">${variable.display_name || variable.displayName || variable.name}</div>
+                                <div class="variable-tech-name">{${variable.name}}</div>
+                                ${variable.description ? `<div class="variable-meta">${variable.description}</div>` : ''}
+                                ${variable.example ? `<div class="variable-meta">Пример: ${variable.example}</div>` : ''}
+                            </li>
+                        `;
+                    });
+                    
+                    html += `</ul></div>`;
+                });
+
+                variablesListDiv.innerHTML = html;
+
+                document.querySelectorAll('.variable-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const varId = item.getAttribute('data-id');
+                        const varName = item.getAttribute('data-name');
+                        
+                        if (item.classList.contains('selected')) {
+                            item.classList.remove('selected');
+                            selectedVariables = selectedVariables.filter(v => v.id !== varId);
+                        } else {
+                            item.classList.add('selected');
+                            const variable = allVariables.find(v => v.id === varId);
+                            if (variable) {
+                                selectedVariables.push(variable);
+                            }
+                        }
+
+                        insertButton.disabled = selectedVariables.length === 0;
+                    });
+                });
+            }
+
+            async function insertVariablesIntoDocument(variables) {
+                if (typeof Word === 'undefined') {
+                    throw new Error('Word API не доступен. Эта функция работает только внутри Word.');
+                }
+
+                await Word.run(async (context) => {
+                    const selection = context.document.getSelection();
+                    let text = '';
+                    variables.forEach((v, index) => {
+                        const varName = v.name;
+                        text += `{{${varName}}}`;
+                        if (index < variables.length - 1) {
+                            text += '\n';
+                        }
+                    });
+                    selection.insertText(text, Word.InsertLocation.replace);
+                    await context.sync();
+                });
+            }
+
+            function showMessage(text, type = 'info') {
+                messageDiv.textContent = text;
+                messageDiv.className = `message ${type}`;
+                messageDiv.style.display = 'block';
+            }
+
+            function hideMessage() {
+                messageDiv.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
+

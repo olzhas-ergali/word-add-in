@@ -1,10 +1,3 @@
-"""
-API endpoints для работы с договорами ДДУ
-С поддержкой ДВУХ источников данных:
-1. Printable Forms API (по умолчанию)
-2. Прямое подключение к БД (если нужна скорость)
-"""
-
 from fastapi import APIRouter, HTTPException, Query
 from typing import List, Dict
 from uuid import UUID
@@ -18,7 +11,10 @@ from app.services.database_service import db_service
 router = APIRouter()
 
 # Загружаем конфигурацию переменных ДДУ
-DDU_VARIABLES_PATH = Path(__file__).parent.parent.parent / "variables_export" / "ddu_variables.json"
+DDU_VARIABLES_PATH = Path(__file__).parent.parent.parent.parent / "variables_export" / "ddu_variables.json"
+
+if not DDU_VARIABLES_PATH.exists():
+    raise FileNotFoundError(f"DDU variables file not found: {DDU_VARIABLES_PATH}")
 
 with open(DDU_VARIABLES_PATH, 'r', encoding='utf-8') as f:
     DDU_CONFIG = json.load(f)
