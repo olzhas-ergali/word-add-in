@@ -1,8 +1,3 @@
-"""
-API для управления параметрами в базе данных
-Просмотр, добавление, редактирование параметров
-"""
-
 from fastapi import APIRouter, HTTPException
 from typing import List, Optional
 from pydantic import BaseModel
@@ -12,7 +7,6 @@ router = APIRouter()
 
 
 class Parameter(BaseModel):
-    """Параметр договора"""
     id: Optional[int] = None
     contract_id: str
     param_name: str
@@ -21,7 +15,6 @@ class Parameter(BaseModel):
 
 
 class CreateParameterRequest(BaseModel):
-    """Запрос на создание параметра"""
     contract_id: str
     param_name: str
     param_value: str
@@ -30,12 +23,6 @@ class CreateParameterRequest(BaseModel):
 
 @router.get("/list")
 async def get_all_parameters():
-    """
-    Получить все параметры из БД
-    
-    Returns:
-        Список всех параметров
-    """
     try:
         if not db_service.pool:
             await db_service.connect()
@@ -70,15 +57,6 @@ async def get_all_parameters():
 
 @router.get("/contract/{contract_id}")
 async def get_parameters_by_contract(contract_id: str):
-    """
-    Получить параметры конкретного договора
-    
-    Args:
-        contract_id: ID договора
-        
-    Returns:
-        Список параметров договора
-    """
     try:
         if not db_service.pool:
             await db_service.connect()
@@ -122,15 +100,6 @@ async def get_parameters_by_contract(contract_id: str):
 
 @router.post("/add")
 async def add_parameter(param: CreateParameterRequest):
-    """
-    Добавить новый параметр
-    
-    Args:
-        param: Данные параметра
-        
-    Returns:
-        Созданный параметр с ID
-    """
     try:
         if not db_service.pool:
             await db_service.connect()
@@ -166,16 +135,6 @@ async def add_parameter(param: CreateParameterRequest):
 
 @router.put("/update/{param_id}")
 async def update_parameter(param_id: int, param: CreateParameterRequest):
-    """
-    Обновить параметр
-    
-    Args:
-        param_id: ID параметра
-        param: Новые данные
-        
-    Returns:
-        Обновленный параметр
-    """
     try:
         if not db_service.pool:
             await db_service.connect()
@@ -220,15 +179,6 @@ async def update_parameter(param_id: int, param: CreateParameterRequest):
 
 @router.delete("/delete/{param_id}")
 async def delete_parameter(param_id: int):
-    """
-    Удалить параметр
-    
-    Args:
-        param_id: ID параметра
-        
-    Returns:
-        Результат удаления
-    """
     try:
         if not db_service.pool:
             await db_service.connect()
@@ -262,17 +212,6 @@ async def search_parameters(
     param_name: Optional[str] = None,
     param_value: Optional[str] = None
 ):
-    """
-    Поиск параметров по критериям
-    
-    Args:
-        contract_id: ID договора (опционально)
-        param_name: Имя параметра (опционально)
-        param_value: Значение параметра (опционально)
-        
-    Returns:
-        Найденные параметры
-    """
     try:
         if not db_service.pool:
             await db_service.connect()

@@ -14,18 +14,15 @@ function createIcon(size) {
     const canvas = document.getElementById('canvas' + size);
     const ctx = canvas.getContext('2d');
     
-    // Background
     ctx.fillStyle = '#4a90e2';
     ctx.fillRect(0, 0, size, size);
     
-    // Text
     ctx.fillStyle = 'white';
     ctx.font = `bold ${size * 0.6}px Arial`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('ПФ', size / 2, size / 2);
     
-    // Download
     canvas.toBlob((blob) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');

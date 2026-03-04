@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-"""
-Simple test script to check API endpoints
-"""
 import asyncio
 import sys
 from app.services.keycloak_service import KeyCloakService
@@ -9,17 +5,11 @@ from app.services.pf_api_service import PfApiService
 
 
 async def test_keycloak():
-    """Test KeyCloak authentication"""
     print("🔐 Testing KeyCloak authentication...")
-    
     service = KeyCloakService()
-    
-    # Note: Replace with test credentials
     username = input("Enter username: ")
     password = input("Enter password: ")
-    
     response = await service.validate_user(username, password)
-    
     if response.success:
         print("✅ Authentication successful!")
         print(f"   Token: {response.data.access_token[:50]}...")
@@ -30,35 +20,24 @@ async def test_keycloak():
 
 
 async def test_pf_api(token=None):
-    """Test Printable Forms API"""
     print("\n📄 Testing Printable Forms API...")
-    
     service = PfApiService()
-    
-    # Test getting template files
     print("   Fetching template files...")
     documents = await service.get_template_files(token)
-    
     if documents:
         print(f"✅ Found {len(documents)} documents:")
-        for doc in documents[:3]:  # Show first 3
+        for doc in documents[:3]:
             print(f"   - {doc.file_name} (ID: {doc.document_id})")
     else:
         print("❌ No documents found")
 
 
 async def main():
-    """Run all tests"""
     print("🧪 API Test Suite\n")
     print("=" * 50)
-    
-    # Test KeyCloak
     token = await test_keycloak()
-    
     if token:
-        # Test PF API with token
         await test_pf_api(token)
-    
     print("\n" + "=" * 50)
     print("✅ Tests completed!")
 
@@ -72,4 +51,3 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n❌ Error: {e}")
         sys.exit(1)
-

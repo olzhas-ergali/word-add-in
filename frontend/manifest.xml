@@ -5,51 +5,39 @@
            xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
            xsi:type="TaskPaneApp">
   
-  <!-- Basic Settings -->
   <Id>12345678-1234-1234-1234-123456789012</Id>
   <Version>1.0.0.0</Version>
   <ProviderName>Printable Forms</ProviderName>
   <DefaultLocale>ru-RU</DefaultLocale>
   
-  <!-- Display Name -->
   <DisplayName DefaultValue="Печатные формы"/>
   
-  <!-- Description -->
   <Description DefaultValue="Надстройка для работы с договорами ДДУ"/>
   
-  <!-- Icon URL -->
   <IconUrl DefaultValue="https://localhost:3000/assets/icon-32.png"/>
   <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-64.png"/>
   
-  <!-- Support URL -->
   <SupportUrl DefaultValue="https://localhost:3000/support"/>
   
-  <!-- App Domains -->
   <AppDomains>
     <AppDomain>https://localhost:3000</AppDomain>
   </AppDomains>
   
-  <!-- Hosts -->
   <Hosts>
     <Host Name="Document"/>
   </Hosts>
   
-  <!-- Default Settings -->
   <DefaultSettings>
     <SourceLocation DefaultValue="https://localhost:3000/taskpane.html"/>
   </DefaultSettings>
   
-  <!-- Permissions -->
   <Permissions>ReadWriteDocument</Permissions>
   
-  <!-- Version Overrides -->
   <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
     
-    <!-- Hosts -->
     <Hosts>
       <Host xsi:type="Document">
         
-        <!-- Ribbon Extension Point -->
         <DesktopFormFactor>
           <GetStarted>
             <Title resid="GetStarted.Title"/>
@@ -57,10 +45,8 @@
             <LearnMoreUrl resid="GetStarted.LearnMoreUrl"/>
           </GetStarted>
           
-          <!-- Function File -->
           <FunctionFile resid="Commands.Url"/>
           
-          <!-- Extension Points -->
           <ExtensionPoint xsi:type="PrimaryCommandSurface">
             <OfficeTab id="TabHome">
               <Group id="PrintableFormsGroup">
@@ -71,7 +57,6 @@
                   <bt:Image size="80" resid="Icon.80x80"/>
                 </Icon>
                 
-                <!-- Parameters Button (заменил Login) -->
                 <Control xsi:type="Button" id="ParametersButton">
                   <Label resid="ParametersButton.Label"/>
                   <Supertip>
@@ -89,7 +74,6 @@
                   </Action>
                 </Control>
                 
-                <!-- Load Template Button -->
                 <Control xsi:type="Button" id="LoadTemplateButton">
                   <Label resid="LoadTemplateButton.Label"/>
                   <Supertip>
@@ -107,7 +91,6 @@
                   </Action>
                 </Control>
                 
-                <!-- Insert Variables Button -->
                 <Control xsi:type="Button" id="InsertVariablesButton">
                   <Label resid="InsertVariablesButton.Label"/>
                   <Supertip>
@@ -125,7 +108,6 @@
                   </Action>
                 </Control>
                 
-                <!-- Fill Variables Button -->
                 <Control xsi:type="Button" id="FillVariablesButton">
                   <Label resid="FillVariablesButton.Label"/>
                   <Supertip>
@@ -150,7 +132,6 @@
       </Host>
     </Hosts>
     
-    <!-- Resources -->
     <Resources>
       <bt:Images>
         <bt:Image id="Icon.16x16" DefaultValue="https://localhost:3000/assets/icon-16.png"/>

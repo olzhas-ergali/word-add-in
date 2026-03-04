@@ -10,7 +10,6 @@ router = APIRouter()
 
 
 def get_token_from_session(session_id: Optional[str]) -> Optional[str]:
-    """Helper to get token from session"""
     if not session_id:
         return None
     
@@ -23,16 +22,6 @@ async def get_document_variables(
     document_id: UUID,
     session_id: Optional[str] = Header(None, alias="X-Session-ID")
 ):
-    """
-    Get all variables for a specific document
-    
-    Args:
-        document_id: Document UUID
-        session_id: Optional session ID for authentication
-        
-    Returns:
-        List of DocumentVariable objects
-    """
     pf_service = PfApiService()
     token = get_token_from_session(session_id)
     
@@ -46,16 +35,6 @@ async def get_variable_values(
     request: VariableValuesRequest,
     session_id: Optional[str] = Header(None, alias="X-Session-ID")
 ):
-    """
-    Get variable values by IDs
-    
-    Args:
-        request: List of variable IDs
-        session_id: Optional session ID for authentication
-        
-    Returns:
-        List of DocumentVariable objects with values
-    """
     if not request.ids:
         raise HTTPException(status_code=400, detail="No variable IDs provided")
     

@@ -48,7 +48,6 @@
             const variablesInfo = document.getElementById('variablesInfo');
             const variablesList = document.getElementById('variablesList');
 
-            // Check if running in Word
             if (!info || info.host !== Office.HostType.Word) {
                 showMessage('Эта страница должна открываться внутри Microsoft Word', 'error');
             }

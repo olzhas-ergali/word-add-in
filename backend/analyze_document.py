@@ -1,19 +1,15 @@
-#!/usr/bin/env python3
-"""
-Расширенный анализ Word документа для поиска всех возможных переменных
-"""
-
 import re
-from docx import Document
-from docx.oxml import parse_xml
+import sys
 from pathlib import Path
 from collections import Counter
-import sys
+
+from docx import Document
+from docx.oxml import parse_xml
+
+from app.constants import ENCODING_UTF8
 
 
 def analyze_document(docx_path: str):
-    """Полный анализ документа"""
-    
     doc = Document(docx_path)
     
     print("=" * 70)
@@ -24,13 +20,11 @@ def analyze_document(docx_path: str):
     print(f"Таблиц: {len(doc.tables)}")
     print()
     
-    # 1. Поиск всех возможных паттернов
     print("🔍 ПОИСК ПЕРЕМЕННЫХ В РАЗНЫХ ФОРМАТАХ")
     print("-" * 70)
     
     all_text = []
     
-    # Собираем весь текст
     for para in doc.paragraphs:
         all_text.append(para.text)
     
@@ -41,7 +35,6 @@ def analyze_document(docx_path: str):
     
     full_text = "\n".join(all_text)
     
-    # Различные паттерны
     patterns = {
         "Фигурные скобки {VAR}": r'\{([^}]+)\}',
         "Двойные фигурные {{VAR}}": r'\{\{([^}]+)\}\}',
@@ -61,14 +54,12 @@ def analyze_document(docx_path: str):
     for pattern_name, pattern in patterns.items():
         matches = re.findall(pattern, full_text)
         if matches:
-            # Отфильтруем очень длинные (вероятно не переменные)
             filtered = [m for m in matches if len(m) < 100]
             if filtered:
                 found_any = True
                 all_variables[pattern_name] = filtered
                 print(f"\n✅ {pattern_name}: найдено {len(filtered)}")
                 
-                # Показываем первые 10
                 for i, match in enumerate(filtered[:10], 1):
                     preview = match[:50] + "..." if len(match) > 50 else match
                     print(f"   {i}. {preview}")
@@ -82,7 +73,6 @@ def analyze_document(docx_path: str):
     print()
     print("=" * 70)
     
-    # 2. Показываем начало документа
     print("📄 НАЧАЛО ДОКУМЕНТА (первые 20 строк):")
     print("-" * 70)
     for i, para in enumerate(doc.paragraphs[:20], 1):
@@ -93,7 +83,6 @@ def analyze_document(docx_path: str):
     print()
     print("=" * 70)
     
-    # 3. Анализ таблиц
     if doc.tables:
         print("📊 ПЕРВАЯ ТАБЛИЦА:")
         print("-" * 70)
@@ -108,14 +97,12 @@ def analyze_document(docx_path: str):
         print()
         print("=" * 70)
     
-    # 4. Проверка на Content Controls
     print("🎛️  ПОИСК CONTENT CONTROLS:")
     print("-" * 70)
     
     content_controls_found = False
     for para in doc.paragraphs[:50]:  # Проверяем первые 50 параграфов
         for run in para.runs:
-            # Проверяем XML на наличие Content Controls
             if 'w:sdt' in str(run.element.xml):
                 content_controls_found = True
                 break
@@ -131,15 +118,12 @@ def analyze_document(docx_path: str):
     print()
     print("=" * 70)
     
-    # 5. Поиск повторяющихся слов (возможно это метки)
     print("🔤 ЧАСТО ВСТРЕЧАЮЩИЕСЯ СЛОВА (возможные метки):")
     print("-" * 70)
     
-    # Разбиваем на слова
     words = re.findall(r'\b[А-ЯЁ][а-яё]+\b', full_text)
     word_counts = Counter(words)
     
-    # Показываем топ-20 слов длиннее 5 символов
     common_words = [(word, count) for word, count in word_counts.most_common(50) 
                     if len(word) > 5 and count > 5]
     
@@ -150,7 +134,6 @@ def analyze_document(docx_path: str):
     print()
     print("=" * 70)
     
-    # 6. Статистика
     print("📈 ОБЩАЯ СТАТИСТИКА:")
     print("-" * 70)
     print(f"Всего символов: {len(full_text):,}")
@@ -158,11 +141,10 @@ def analyze_document(docx_path: str):
     print(f"Всего строк: {len(all_text):,}")
     print()
     
-    # 7. Сохраняем образец текста
     sample_path = Path("variables_export/document_sample.txt")
     sample_path.parent.mkdir(exist_ok=True)
     
-    with open(sample_path, 'w', encoding='utf-8') as f:
+    with open(sample_path, 'w', encoding=ENCODING_UTF8) as f:
         f.write("ОБРАЗЕЦ ТЕКСТА ДОКУМЕНТА\n")
         f.write("=" * 70 + "\n\n")
         for i, para in enumerate(doc.paragraphs[:100], 1):
@@ -172,7 +154,6 @@ def analyze_document(docx_path: str):
     print(f"💾 Образец текста сохранен: {sample_path}")
     print()
     
-    # 8. Если нашли переменные, предлагаем создать БД
     if all_variables:
         print("=" * 70)
         print("✅ НАЙДЕНЫ ПЕРЕМЕННЫЕ!")
@@ -183,10 +164,9 @@ def analyze_document(docx_path: str):
         print("которая больше всего подходит вашему документу.")
         print()
         
-        # Сохраняем все найденные переменные
         import json
         all_vars_path = Path("variables_export/all_found_variables.json")
-        with open(all_vars_path, 'w', encoding='utf-8') as f:
+        with open(all_vars_path, 'w', encoding=ENCODING_UTF8) as f:
             json.dump(all_variables, f, ensure_ascii=False, indent=2)
         print(f"💾 Все найденные переменные: {all_vars_path}")
     

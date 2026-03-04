@@ -1,10 +1,4 @@
-/**
- * Mock данные для работы без Backend
- * Используется когда backend недоступен
- */
-
 const MOCK_DATA = {
-    // Тестовые параметры
     parameters: [
         {
             id: 1,
@@ -71,8 +65,6 @@ const MOCK_DATA = {
             created_at: new Date().toISOString()
         }
     ],
-    
-    // Тестовые документы
     documents: [
         {
             documentId: "00000000-0000-0000-0000-000000000001",
@@ -91,9 +83,6 @@ const MOCK_DATA = {
     ]
 };
 
-/**
- * Mock API сервис для работы без backend
- */
 class MockApiService {
     constructor() {
         this.mode = 'offline';
@@ -101,9 +90,6 @@ class MockApiService {
         this.nextId = 9;
     }
 
-    /**
-     * Получить все параметры
-     */
     async getParameters() {
         await this.delay(300);
         return {
@@ -112,9 +98,6 @@ class MockApiService {
         };
     }
 
-    /**
-     * Получить параметры по contract_id
-     */
     async getParametersByContract(contractId) {
         await this.delay(200);
         const filtered = this.parameters.filter(p => p.contract_id === contractId);
@@ -125,9 +108,6 @@ class MockApiService {
         };
     }
 
-    /**
-     * Добавить параметр
-     */
     async addParameter(param) {
         await this.delay(200);
         const newParam = {
@@ -147,16 +127,12 @@ class MockApiService {
         };
     }
 
-    /**
-     * Обновить параметр
-     */
     async updateParameter(paramId, param) {
         await this.delay(200);
         const index = this.parameters.findIndex(p => p.id === paramId);
         if (index === -1) {
             throw new Error("Параметр не найден");
         }
-        
         this.parameters[index] = {
             ...this.parameters[index],
             param_name: param.param_name,
@@ -164,7 +140,6 @@ class MockApiService {
             description: param.description,
             updated_at: new Date().toISOString()
         };
-        
         return {
             success: true,
             message: "Параметр обновлен (в памяти)",
@@ -172,16 +147,12 @@ class MockApiService {
         };
     }
 
-    /**
-     * Удалить параметр
-     */
     async deleteParameter(paramId) {
         await this.delay(200);
         const index = this.parameters.findIndex(p => p.id === paramId);
         if (index === -1) {
             throw new Error("Параметр не найден");
         }
-        
         this.parameters.splice(index, 1);
         return {
             success: true,
@@ -190,51 +161,38 @@ class MockApiService {
         };
     }
 
-    /**
-     * Поиск параметров
-     */
     async searchParameters(contractId, paramName, paramValue) {
         await this.delay(300);
         let filtered = [...this.parameters];
-        
         if (contractId) {
-            filtered = filtered.filter(p => 
+            filtered = filtered.filter(p =>
                 p.contract_id.toLowerCase().includes(contractId.toLowerCase())
             );
         }
         if (paramName) {
-            filtered = filtered.filter(p => 
+            filtered = filtered.filter(p =>
                 p.param_name.toLowerCase().includes(paramName.toLowerCase())
             );
         }
         if (paramValue) {
-            filtered = filtered.filter(p => 
+            filtered = filtered.filter(p =>
                 p.param_value.toLowerCase().includes(paramValue.toLowerCase())
             );
         }
-        
         return {
             count: filtered.length,
             parameters: filtered
         };
     }
 
-    /**
-     * Получить документы
-     */
     async getDocuments() {
         await this.delay(500);
         return MOCK_DATA.documents;
     }
 
-    /**
-     * Имитация задержки сети
-     */
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 
-// Глобальный экземпляр
 const mockApiService = new MockApiService();
-

@@ -1,6 +1,3 @@
-"""
-Пример FastAPI endpoint для работы с переменными ДДУ
-"""
 from fastapi import APIRouter, HTTPException
 from typing import List, Dict
 from uuid import UUID
@@ -8,7 +5,6 @@ from app.models.document import DocumentVariable
 
 router = APIRouter()
 
-# Маппинг переменных (генерируется автоматически)
 DDU_VARIABLES = {
     "CONTRACT_NUMBER": {
         "id": "237701d3-4b58-4c45-ba2d-d0cbe407089b",
@@ -248,13 +244,8 @@ async def get_ddu_variables():
 @router.post("/ddu/fill")
 async def fill_ddu_document(contract_id: str):
     """Заполнить документ ДДУ данными из БД"""
-    # TODO: Получить данные из БД по contract_id
-    # TODO: Заполнить переменные
-    # TODO: Вернуть заполненный документ
-    
     filled_variables = {}
     for var_name, var_info in DDU_VARIABLES.items():
-        # Здесь запрос в БД
         value = get_from_database(var_info['table'], var_info['field'], contract_id)
         filled_variables[var_info['id']] = value
     

@@ -1,25 +1,15 @@
-#!/usr/bin/env python3
-"""
-Создание базы переменных для документа ДДУ (Договор Долевого Участия)
-на основе семантического анализа контекста
-"""
-
 import json
-from uuid import uuid4
 from pathlib import Path
+from uuid import uuid4
 from datetime import datetime
+
+from app.constants import ENCODING_UTF8, ENCODING_UTF8_SIG
 
 
 def create_ddu_variables():
-    """Создать структурированную базу переменных для ДДУ"""
-    
-    # UUID документа
     document_id = str(uuid4())
     document_name = "ДДУ Шымкент"
-    
-    # Определяем все переменные на основе контекста договора
     variables = [
-        # Информация о договоре
         {
             "id": str(uuid4()),
             "name": "CONTRACT_NUMBER",
@@ -72,8 +62,6 @@ def create_ddu_variables():
             "example": "2020",
             "category": "Договор"
         },
-        
-        # Информация об уполномоченной компании
         {
             "id": str(uuid4()),
             "name": "COMPANY_NAME",
@@ -205,7 +193,6 @@ def create_ddu_variables():
             "category": "Уполномоченная компания"
         },
         
-        # Информация о дольщике (клиенте)
         {
             "id": str(uuid4()),
             "name": "CLIENT_FIO",
@@ -311,7 +298,6 @@ def create_ddu_variables():
             "category": "Дольщик"
         },
         
-        # Информация об объекте (квартире/доле)
         {
             "id": str(uuid4()),
             "name": "APARTMENT_NUMBER",
@@ -391,7 +377,6 @@ def create_ddu_variables():
             "category": "Объект"
         },
         
-        # Финансовая информация
         {
             "id": str(uuid4()),
             "name": "PRICE_TOTAL",
@@ -432,7 +417,6 @@ def create_ddu_variables():
             "category": "Финансы"
         },
         
-        # Даты и сроки
         {
             "id": str(uuid4()),
             "name": "COMPLETION_DATE",
@@ -499,7 +483,6 @@ def create_ddu_variables():
             "category": "Документы"
         },
         
-        # Дополнительные поля
         {
             "id": str(uuid4()),
             "name": "KEYS_COUNT",
@@ -532,7 +515,6 @@ def create_ddu_variables():
 
 
 def save_to_json(document_id, document_name, variables, output_dir):
-    """Сохранить в JSON"""
     output_path = output_dir / "ddu_variables.json"
     
     data = {
@@ -543,7 +525,7 @@ def save_to_json(document_id, document_name, variables, output_dir):
         "variables": variables
     }
     
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, 'w', encoding=ENCODING_UTF8) as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
     print(f"✅ JSON: {output_path}")
@@ -551,7 +533,6 @@ def save_to_json(document_id, document_name, variables, output_dir):
 
 
 def save_to_sql(document_id, document_name, variables, output_dir):
-    """Создать SQL скрипт"""
     output_path = output_dir / "ddu_variables.sql"
     
     sql = f"""-- SQL скрипт для документа ДДУ Шымкент
@@ -611,7 +592,7 @@ INSERT INTO document_variables (
 );
 """
     
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, 'w', encoding=ENCODING_UTF8) as f:
         f.write(sql)
     
     print(f"✅ SQL: {output_path}")
@@ -619,22 +600,19 @@ INSERT INTO document_variables (
 
 
 def save_mapping_excel(variables, output_dir):
-    """Создать Excel таблицу для маппинга"""
     output_path = output_dir / "ddu_mapping_template.csv"
     
     import csv
     
-    with open(output_path, 'w', encoding='utf-8-sig', newline='') as f:
+    with open(output_path, 'w', encoding=ENCODING_UTF8_SIG, newline='') as f:
         writer = csv.writer(f, delimiter=';')
         
-        # Заголовки
         writer.writerow([
             'ID', 'Имя переменной', 'Отображаемое имя (РУ)', 
             'Отображаемое имя (КЗ)', 'Категория', 'Таблица БД', 
             'Поле БД', 'Тип данных', 'Обязательное', 'Пример значения'
         ])
         
-        # Данные
         for var in variables:
             writer.writerow([
                 var['id'],
@@ -654,7 +632,6 @@ def save_mapping_excel(variables, output_dir):
 
 
 def create_api_endpoint_example(variables, output_dir):
-    """Создать пример FastAPI endpoint"""
     output_path = output_dir / "ddu_api_endpoint_example.py"
     
     code = '''"""
@@ -667,7 +644,6 @@ from app.models.document import DocumentVariable
 
 router = APIRouter()
 
-# Маппинг переменных (генерируется автоматически)
 DDU_VARIABLES = {
 '''
     
@@ -684,49 +660,39 @@ DDU_VARIABLES = {
 
 @router.get("/ddu/variables")
 async def get_ddu_variables():
-    """Получить все переменные для ДДУ"""
     return {"variables": list(DDU_VARIABLES.values())}
 
 @router.post("/ddu/fill")
 async def fill_ddu_document(contract_id: str):
-    """Заполнить документ ДДУ данными из БД"""
-    # TODO: Получить данные из БД по contract_id
-    # TODO: Заполнить переменные
-    # TODO: Вернуть заполненный документ
     
     filled_variables = {}
     for var_name, var_info in DDU_VARIABLES.items():
-        # Здесь запрос в БД
         value = get_from_database(var_info['table'], var_info['field'], contract_id)
         filled_variables[var_info['id']] = value
     
     return {"variables": filled_variables}
 '''
     
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, 'w', encoding=ENCODING_UTF8) as f:
         f.write(code)
     
     print(f"✅ API Example: {output_path}")
 
 
 def main():
-    """Основная функция"""
     print("=" * 70)
     print("🏗️  СОЗДАНИЕ БАЗЫ ПЕРЕМЕННЫХ ДЛЯ ДДУ ШЫМКЕНТ")
     print("=" * 70)
     print()
     
-    # Создаем директорию для экспорта
     output_dir = Path("variables_export")
     output_dir.mkdir(exist_ok=True)
     
-    # Создаем переменные
     document_id, document_name, variables = create_ddu_variables()
     
     print(f"📋 Создано переменных: {len(variables)}")
     print()
     
-    # Группируем по категориям
     categories = {}
     for var in variables:
         category = var.get('category', 'Без категории')
@@ -740,7 +706,6 @@ def main():
         print(f"  {category:30s} - {len(vars_list):2d} переменных")
     print()
     
-    # Сохраняем в разных форматах
     print("💾 Сохранение...")
     print()
     

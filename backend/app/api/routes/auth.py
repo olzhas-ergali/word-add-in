@@ -11,15 +11,6 @@ router = APIRouter()
 
 @router.post("/login", response_model=KeyCloakResponse)
 async def login(request: LoginRequest):
-    """
-    Authenticate user with KeyCloak
-    
-    Args:
-        request: Login credentials (username and password)
-        
-    Returns:
-        KeyCloakResponse with token data or error
-    """
     keycloak_service = KeyCloakService()
     
     response = await keycloak_service.validate_user(
@@ -37,12 +28,10 @@ async def login(request: LoginRequest):
             }
         )
     
-    # Generate session ID and cache token
     session_id = str(uuid4())
     if response.data:
         cache_service.cache_token(session_id, response.data)
     
-    # Add session_id to response for client to use in subsequent requests
     return {
         **response.model_dump(),
         "session_id": session_id
@@ -51,15 +40,6 @@ async def login(request: LoginRequest):
 
 @router.post("/logout")
 async def logout(session_id: Optional[str] = Header(None, alias="X-Session-ID")):
-    """
-    Logout user and clear cached token
-    
-    Args:
-        session_id: Session ID from header
-        
-    Returns:
-        Success message
-    """
     if session_id:
         cache_service.remove_token(session_id)
     
@@ -68,15 +48,6 @@ async def logout(session_id: Optional[str] = Header(None, alias="X-Session-ID"))
 
 @router.get("/validate")
 async def validate_session(session_id: Optional[str] = Header(None, alias="X-Session-ID")):
-    """
-    Validate if session is still active
-    
-    Args:
-        session_id: Session ID from header
-        
-    Returns:
-        Validation result
-    """
     if not session_id:
         return {"valid": False, "message": "No session ID provided"}
     

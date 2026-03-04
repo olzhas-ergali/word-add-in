@@ -1,32 +1,19 @@
-#!/usr/bin/env python3
-"""
-Скрипт для извлечения переменных из Word документа
-и создания базы данных переменных
-"""
-
 import re
 import json
-from uuid import uuid4
-from pathlib import Path
-from docx import Document
-from typing import List, Dict, Set
 import sys
+from pathlib import Path
+from uuid import uuid4
+from typing import List, Dict, Set
+
+from docx import Document
+
+from app.constants import ENCODING_UTF8
 
 
 def extract_placeholders_from_docx(docx_path: str) -> Set[str]:
-    """
-    Извлечь все плейсхолдеры из документа Word
-    Поддерживаемые форматы:
-    - {VARIABLE_NAME}
-    - {{VARIABLE_NAME}}
-    - [VARIABLE_NAME]
-    - [[VARIABLE_NAME]]
-    - ${VARIABLE_NAME}
-    """
     doc = Document(docx_path)
     placeholders = set()
     
-    # Паттерны для поиска переменных
     patterns = [
         r'\{([A-Za-zА-Яа-яЁё0-9_\s]+)\}',           # {VAR}
         r'\{\{([A-Za-zА-Яа-яЁё0-9_\s]+)\}\}',       # {{VAR}}
@@ -40,7 +27,6 @@ def extract_placeholders_from_docx(docx_path: str) -> Set[str]:
     print(f"   Таблиц: {len(doc.tables)}")
     print()
     
-    # Извлекаем из параграфов
     for i, para in enumerate(doc.paragraphs):
         text = para.text
         for pattern in patterns:
@@ -48,7 +34,6 @@ def extract_placeholders_from_docx(docx_path: str) -> Set[str]:
             for match in matches:
                 placeholders.add(match.strip())
     
-    # Извлекаем из таблиц
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:
@@ -58,11 +43,8 @@ def extract_placeholders_from_docx(docx_path: str) -> Set[str]:
                     for match in matches:
                         placeholders.add(match.strip())
     
-    # Извлекаем из Custom Properties
     try:
         core_props = doc.core_properties
-        # Note: python-docx не поддерживает custom properties напрямую
-        # Но мы можем прочитать их через lxml если нужно
     except:
         pass
     
@@ -70,9 +52,6 @@ def extract_placeholders_from_docx(docx_path: str) -> Set[str]:
 
 
 def create_variable_database(placeholders: Set[str], document_name: str) -> List[Dict]:
-    """
-    Создать базу данных переменных с UUID
-    """
     variables = []
     
     for placeholder in sorted(placeholders):
@@ -94,9 +73,6 @@ def create_variable_database(placeholders: Set[str], document_name: str) -> List
 
 
 def generate_mapping_template(variables: List[Dict]) -> str:
-    """
-    Создать шаблон для маппинга переменных на поля БД
-    """
     template = "# Маппинг переменных на поля базы данных\n"
     template += "# Заполните поля 'table' и 'field' для каждой переменной\n\n"
     
@@ -112,14 +88,12 @@ def generate_mapping_template(variables: List[Dict]) -> str:
 
 
 def save_to_json(variables: List[Dict], output_path: str):
-    """Сохранить переменные в JSON"""
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, 'w', encoding=ENCODING_UTF8) as f:
         json.dump(variables, f, ensure_ascii=False, indent=2)
     print(f"✅ Сохранено в: {output_path}")
 
 
 def save_to_sql(variables: List[Dict], output_path: str, document_id: str):
-    """Создать SQL скрипт для вставки в БД"""
     sql = f"""-- SQL скрипт для создания переменных документа
 -- Документ: {document_id}
 -- Дата: {Path().absolute()}
@@ -146,13 +120,12 @@ VALUES (
 );
 """
     
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, 'w', encoding=ENCODING_UTF8) as f:
         f.write(sql)
     print(f"✅ SQL скрипт сохранен: {output_path}")
 
 
 def generate_python_dict(variables: List[Dict]) -> str:
-    """Создать Python словарь для использования в коде"""
     code = "# Python словарь переменных\n"
     code += "DOCUMENT_VARIABLES = {\n"
     
@@ -169,9 +142,6 @@ def generate_python_dict(variables: List[Dict]) -> str:
 
 
 def main():
-    """Основная функция"""
-    
-    # Путь к документу
     docx_path = "../ДДУ Шымкент.docx"
     
     if not Path(docx_path).exists():
@@ -184,7 +154,6 @@ def main():
     print("=" * 60)
     print()
     
-    # Извлекаем переменные
     placeholders = extract_placeholders_from_docx(docx_path)
     
     print(f"✅ Найдено переменных: {len(placeholders)}")
@@ -196,45 +165,37 @@ def main():
         print("   {VARIABLE}, {{VARIABLE}}, [VARIABLE], или ${VARIABLE}")
         return
     
-    # Выводим список найденных переменных
     print("📋 Найденные переменные:")
     print("-" * 60)
     for i, var in enumerate(sorted(placeholders), 1):
         print(f"{i:3d}. {var}")
     print()
     
-    # Создаем базу данных переменных
     document_id = str(uuid4())
     document_name = "ДДУ Шымкент"
     variables = create_variable_database(placeholders, document_name)
     
-    # Создаем директорию для выходных файлов
     output_dir = Path("variables_export")
     output_dir.mkdir(exist_ok=True)
     
-    # Сохраняем в разных форматах
     print("💾 Сохранение результатов...")
     print()
     
-    # 1. JSON для API
     json_path = output_dir / "variables.json"
     save_to_json(variables, str(json_path))
     
-    # 2. SQL для базы данных
     sql_path = output_dir / "variables.sql"
     save_to_sql(variables, str(sql_path), document_id)
     
-    # 3. Шаблон для маппинга
     mapping_path = output_dir / "mapping_template.txt"
     mapping_template = generate_mapping_template(variables)
-    with open(mapping_path, 'w', encoding='utf-8') as f:
+    with open(mapping_path, 'w', encoding=ENCODING_UTF8) as f:
         f.write(mapping_template)
     print(f"✅ Шаблон маппинга: {mapping_path}")
     
-    # 4. Python словарь
     py_path = output_dir / "variables_dict.py"
     py_code = generate_python_dict(variables)
-    with open(py_path, 'w', encoding='utf-8') as f:
+    with open(py_path, 'w', encoding=ENCODING_UTF8) as f:
         f.write(py_code)
     print(f"✅ Python код: {py_path}")
     

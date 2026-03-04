@@ -5,37 +5,23 @@ from app.models.keycloak import KeyCloakToken, KeyCloakResponse, KeyCloakError
 
 
 class KeyCloakService:
-    """Service for KeyCloak authentication"""
-    
+
     def __init__(self):
         self.client_api = settings.keycloak_client_api
         self.client_id = settings.keycloak_client_id
         self.client_secret = settings.keycloak_client_secret
     
     async def validate_user(self, username: str, password: str) -> KeyCloakResponse:
-        """
-        Authenticate user with KeyCloak
-        
-        Args:
-            username: User's username or email
-            password: User's password
-            
-        Returns:
-            KeyCloakResponse with token data or error
-        """
-        # ДЕМО-РЕЖИМ: Принимаем любые учетные данные
         from app.config import settings
         from uuid import uuid4
-        if settings.demo_mode:
-            print(f"🎭 DEMO MODE: Accepting login for user '{username}'")
-            # Возвращаем фейковый токен для демо-режима
+        if settings.demo_mode or not settings.keycloak_client_api:
             demo_token = KeyCloakToken(
                 access_token="demo_access_token_" + username,
                 expires_in=3600,
                 refresh_expires_in=7200,
                 refresh_token="demo_refresh_token",
                 token_type="Bearer",
-                session_state=uuid4()  # Генерируем валидный UUID для session
+                session_state=uuid4()
             )
             return KeyCloakResponse(
                 success=True,
@@ -44,7 +30,6 @@ class KeyCloakService:
                 message=f"Demo mode: authenticated as {username}"
             )
         
-        # Обычный режим с реальным KeyCloak
         data = {
             "grant_type": "password",
             "scope": "openid",
@@ -73,12 +58,9 @@ class KeyCloakService:
             )
     
     async def _process_response(self, response: httpx.Response) -> KeyCloakResponse:
-        """Process KeyCloak API response"""
-        
         status_code = response.status_code
         success = response.is_success
         
-        # Handle server errors (5xx)
         if status_code >= 500:
             return KeyCloakResponse(
                 success=False,
@@ -87,7 +69,6 @@ class KeyCloakService:
                 error_description=response.text
             )
         
-        # Handle client errors (4xx)
         if status_code >= 400:
             try:
                 error_data = response.json()
@@ -105,7 +86,6 @@ class KeyCloakService:
                     error_description=response.text
                 )
         
-        # Handle success (2xx)
         try:
             token_data = KeyCloakToken(**response.json())
             return KeyCloakResponse(

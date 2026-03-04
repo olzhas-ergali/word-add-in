@@ -94,7 +94,6 @@
         
         <div id="message" class="message" style="display: none;"></div>
         
-        <!-- Поиск -->
         <div class="form-inline">
             <input type="text" id="searchContractId" placeholder="ID договора">
             <input type="text" id="searchParamName" placeholder="Имя параметра">
@@ -103,7 +102,6 @@
             <button onclick="loadParameters()" class="btn-secondary">Показать все</button>
         </div>
         
-        <!-- Добавить новый -->
         <details>
             <summary style="cursor: pointer; padding: 10px; background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
                 Добавить новый параметр
@@ -129,7 +127,6 @@
             </form>
         </details>
         
-        <!-- Таблица -->
         <div class="table-container">
             <table id="paramsTable">
                 <thead>
@@ -150,7 +147,6 @@
         </div>
     </div>
 
-    <!-- Modal для редактирования -->
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -189,13 +185,10 @@
         Office.onReady(() => {
             loadParameters();
             
-            // Add form
             document.getElementById('addForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 await addParameter();
             });
-            
-            // Edit form
             document.getElementById('editForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 await updateParameter();

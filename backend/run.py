@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-"""
-Run the FastAPI application
-"""
 import uvicorn
 from app.config import settings
 
@@ -13,4 +9,3 @@ if __name__ == "__main__":
         reload=settings.api_debug,
         log_level="info"
     )
-

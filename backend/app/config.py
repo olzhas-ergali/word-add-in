@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     database_name: str = "printable_forms"
     database_user: str = "postgres"
     database_password: str = "postgres"
-    use_database_direct: bool = True
+    use_database_direct: bool = False
     
     class Config:
         env_file = ".env"
