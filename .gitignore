@@ -96,6 +96,11 @@ AppPackages/
 .env
 .env.local
 
+# Optional local copies of 1C sources (canonical paths: backend/1c_pm_sources/)
+ДКП.txt
+ПМСформироватьФормированиеПД.txt
+УСО.txt
+
 # Others
 [Bb]in
 [Oo]bj
