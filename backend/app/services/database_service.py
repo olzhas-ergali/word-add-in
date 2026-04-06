@@ -100,7 +100,7 @@ class DatabaseService:
                     description=row['description'],
                     category=row['category'],
                     data_type=row['data_type'],
-                    required=row['required'] if row['required'] is not None else False,
+                    required=row['required'],
                     example=row['example'],
                     value=None
                 ))

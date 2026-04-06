@@ -1,5 +1,11 @@
 Запуск: в корне проекта выполнить
-  docker-compose up -d
+  docker compose up -d
+  (или: docker-compose up -d)
+
+Проверка после старта:
+  curl http://localhost:8000/health
+  curl -k https://localhost:3000/
+  Ожидается HTTP 200. Браузер на https://localhost:3000 покажет предупреждение о сертификате — это нормально до установки корня (см. ниже).
 
 Бэкенд: http://localhost:8000
 Фронт (надстройка): https://localhost:3000

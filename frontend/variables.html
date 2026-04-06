@@ -44,6 +44,15 @@
             color: #718096;
             margin-top: 4px;
         }
+        .required-flag {
+            display: inline-block;
+            margin-top: 6px;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #eef2ff;
+            color: #3730a3;
+        }
         .category-group {
             margin-bottom: 20px;
         }
@@ -131,11 +140,12 @@
                     const documentId = doc.documentId || doc.document_id;
                     const response = await apiService.getDocumentVariables(documentId);
                     
-                    if (!response || !response.variables) {
+                    const variablesPayload = Array.isArray(response) ? response : response?.variables;
+                    if (!variablesPayload) {
                         throw new Error('Не удалось загрузить переменные');
                     }
 
-                    allVariables = response.variables;
+                    allVariables = variablesPayload;
                     renderVariables(allVariables);
                     
                 } catch (error) {
@@ -166,10 +176,13 @@
                     html += `<ul class="variable-list">`;
                     
                     grouped[category].forEach(variable => {
+                        const representation = variable.display_name || variable.displayName || variable.name;
+                        const requiredLabel = variable.required === false ? 'Необязательный' : 'Обязательный';
                         html += `
                             <li class="variable-item" data-id="${variable.id}" data-name="${variable.name}">
-                                <div class="variable-name">${variable.display_name || variable.displayName || variable.name}</div>
-                                <div class="variable-tech-name">{${variable.name}}</div>
+                                <div class="variable-name">${variable.name}</div>
+                                <div class="variable-meta">Представление: ${representation}</div>
+                                <div class="required-flag">${requiredLabel}</div>
                                 ${variable.description ? `<div class="variable-meta">${variable.description}</div>` : ''}
                                 ${variable.example ? `<div class="variable-meta">Пример: ${variable.example}</div>` : ''}
                             </li>

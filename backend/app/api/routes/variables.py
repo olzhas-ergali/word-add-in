@@ -5,6 +5,7 @@ from app.models.document import DocumentVariable
 from app.models.requests import VariableValuesRequest
 from app.services.pf_api_service import PfApiService
 from app.services.cache_service import cache_service
+from app.services.pmadd_metadata_service import pmadd_metadata_service
 
 router = APIRouter()
 
@@ -26,7 +27,18 @@ async def get_document_variables(
     token = get_token_from_session(session_id)
     
     variables = await pf_service.get_document_variables(document_id, token)
-    
+
+    parsed_metadata = pmadd_metadata_service.get_by_name()
+    for variable in variables:
+        meta = parsed_metadata.get(variable.name)
+        if not meta:
+            continue
+
+        if not variable.display_name and meta.get("display_name"):
+            variable.display_name = str(meta["display_name"])
+        if variable.required is None:
+            variable.required = bool(meta.get("required", True))
+
     return variables
 
 

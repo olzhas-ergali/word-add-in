@@ -18,6 +18,23 @@ class ApiService {
         return headers;
     }
 
+    async request(path, options = {}) {
+        try {
+            const response = await fetch(`${this.baseUrl}${path}`, options);
+            return response;
+        } catch (error) {
+            const message = String(error?.message || error || "");
+            const sslLikely = message.includes("Failed to fetch") || message.includes("NetworkError");
+            if (sslLikely) {
+                throw new Error(
+                    "Не удалось установить защищенное соединение с сервисом. " +
+                    "Проверьте, что сертификат localhost доверен в Windows, затем перезапустите Word."
+                );
+            }
+            throw error;
+        }
+    }
+
     async login(username, password) {
         try {
             const response = await fetch(`${this.baseUrl}${CONFIG.ENDPOINTS.LOGIN}`, {
@@ -60,7 +77,7 @@ class ApiService {
 
     async getDocuments() {
         try {
-            const response = await fetch(`${this.baseUrl}${CONFIG.ENDPOINTS.DOCUMENTS}`, {
+            const response = await this.request(`${CONFIG.ENDPOINTS.DOCUMENTS}`, {
                 method: 'GET',
                 headers: this.getHeaders()
             });
@@ -76,8 +93,8 @@ class ApiService {
 
     async downloadDocument(documentId) {
         try {
-            const response = await fetch(
-                `${this.baseUrl}${CONFIG.ENDPOINTS.DOWNLOAD}/${documentId}`,
+            const response = await this.request(
+                `${CONFIG.ENDPOINTS.DOWNLOAD}/${documentId}`,
                 {method: 'GET', headers: this.getHeaders()}
             );
             if (!response.ok) {
@@ -92,8 +109,8 @@ class ApiService {
 
     async getDocumentVariables(documentId) {
         try {
-            const response = await fetch(
-                `${this.baseUrl}${CONFIG.ENDPOINTS.VARIABLES}/${documentId}`,
+            const response = await this.request(
+                `${CONFIG.ENDPOINTS.VARIABLES}/${documentId}`,
                 {method: 'GET', headers: this.getHeaders()}
             );
             if (!response.ok) {
@@ -108,8 +125,8 @@ class ApiService {
 
     async getVariableValues(variableIds) {
         try {
-            const response = await fetch(
-                `${this.baseUrl}${CONFIG.ENDPOINTS.VARIABLE_VALUES}`,
+            const response = await this.request(
+                `${CONFIG.ENDPOINTS.VARIABLE_VALUES}`,
                 {
                     method: 'POST',
                     headers: this.getHeaders(),

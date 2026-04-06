@@ -92,6 +92,10 @@ csx
 # Windows Store app package directory
 AppPackages/
 
+# Local env (secrets)
+.env
+.env.local
+
 # Others
 [Bb]in
 [Oo]bj
