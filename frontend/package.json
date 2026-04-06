@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "Frontend for Word Add-in",
   "scripts": {
-    "serve": "office-addin-debugging start manifest.xml desktop --dev-server-port 3000"
+    "serve": "office-addin-debugging start manifest.xml desktop --dev-server-port 3000",
+    "register": "office-addin-dev-settings register manifest.xml",
+    "sideload:word": "office-addin-dev-settings sideload manifest.xml -a Word",
+    "dev:word": "office-addin-dev-settings register manifest.xml && office-addin-dev-settings sideload manifest.xml -a Word"
   },
   "dependencies": {},
   "devDependencies": {

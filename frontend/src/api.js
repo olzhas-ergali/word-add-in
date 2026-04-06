@@ -37,7 +37,7 @@ class ApiService {
 
     async login(username, password) {
         try {
-            const response = await fetch(`${this.baseUrl}${CONFIG.ENDPOINTS.LOGIN}`, {
+            const response = await this.request(`${CONFIG.ENDPOINTS.LOGIN}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
@@ -62,7 +62,7 @@ class ApiService {
 
     async logout() {
         try {
-            await fetch(`${this.baseUrl}${CONFIG.ENDPOINTS.LOGOUT}`, {
+            await this.request(`${CONFIG.ENDPOINTS.LOGOUT}`, {
                 method: 'POST',
                 headers: this.getHeaders()
             });

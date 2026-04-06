@@ -1,5 +1,19 @@
 const CONFIG = {
-    API_BASE_URL: 'http://localhost:8000',
+    /**
+     * В Docker надстройка открывается с https://localhost:3000 — API должен идти с того же origin
+     * (прокси /api/ в nginx), иначе браузер/WebView блокирует mixed content (HTTPS → http://8000).
+     * Прямой backend: http://localhost:8000 — только при локальном запуске без nginx.
+     */
+    get API_BASE_URL() {
+        if (typeof window !== 'undefined' && window.location) {
+            const h = window.location.hostname;
+            const p = window.location.port;
+            if (h === 'localhost' && (p === '3000' || p === '3001')) {
+                return window.location.origin;
+            }
+        }
+        return 'http://localhost:8000';
+    },
     ENDPOINTS: {
         LOGIN: '/api/auth/login',
         LOGOUT: '/api/auth/logout',
